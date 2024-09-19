@@ -648,5 +648,7 @@ class Doctor extends VaahModel
     //-------------------------------------------------
     //-------------------------------------------------
 
-
+    public function appointments(){
+        return $this->hasMany(Appointment::class,'doctor_id','id');
+    }
 }

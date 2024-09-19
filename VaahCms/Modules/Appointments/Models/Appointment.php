@@ -10,14 +10,14 @@ use WebReinvent\VaahCms\Traits\CrudWithUuidObservantTrait;
 use WebReinvent\VaahCms\Models\User;
 use WebReinvent\VaahCms\Libraries\VaahSeeder;
 
-class Patient extends VaahModel
+class Appointment extends VaahModel
 {
 
     use SoftDeletes;
 //    use CrudWithUuidObservantTrait;
 
     //-------------------------------------------------
-    protected $table = 'ap_patients';
+    protected $table = 'ap_appointments';
     //-------------------------------------------------
     protected $dates = [
         'created_at',
@@ -27,9 +27,8 @@ class Patient extends VaahModel
     //-------------------------------------------------
     protected $fillable = [
         'id',
-        'name',
-        'email',
-        'phone'
+        'time',
+        'status'
     ];
     //-------------------------------------------------
     protected $fill_except = [
@@ -175,6 +174,7 @@ class Patient extends VaahModel
 
         $item = new self();
         $item->fill($inputs);
+        $item->status = 1; //keeping the status booked by default
         $item->save();
 
         $response = self::getItem($item->id);
@@ -476,29 +476,29 @@ class Patient extends VaahModel
             return $validation;
         }
 
-//        // check if name exist
-//        $item = self::where('id', '!=', $id)
-//            ->withTrashed()
-//            ->where('name', $inputs['name'])->first();
-//
-//         if ($item) {
-//             $error_message = "This name is already exist".($item->deleted_at?' in trash.':'.');
-//             $response['success'] = false;
-//             $response['errors'][] = $error_message;
-//             return $response;
-//         }
-//
-//         // check if slug exist
-//         $item = self::where('id', '!=', $id)
-//             ->withTrashed()
-//             ->where('slug', $inputs['slug'])->first();
-//
-//         if ($item) {
-//             $error_message = "This slug is already exist".($item->deleted_at?' in trash.':'.');
-//             $response['success'] = false;
-//             $response['errors'][] = $error_message;
-//             return $response;
-//         }
+        // check if name exist
+        $item = self::where('id', '!=', $id)
+            ->withTrashed()
+            ->where('name', $inputs['name'])->first();
+
+         if ($item) {
+             $error_message = "This name is already exist".($item->deleted_at?' in trash.':'.');
+             $response['success'] = false;
+             $response['errors'][] = $error_message;
+             return $response;
+         }
+
+         // check if slug exist
+         $item = self::where('id', '!=', $id)
+             ->withTrashed()
+             ->where('slug', $inputs['slug'])->first();
+
+         if ($item) {
+             $error_message = "This slug is already exist".($item->deleted_at?' in trash.':'.');
+             $response['success'] = false;
+             $response['errors'][] = $error_message;
+             return $response;
+         }
 
         $item = self::where('id', $id)->withTrashed()->first();
         $item->fill($inputs);
@@ -560,9 +560,7 @@ class Patient extends VaahModel
     {
 
         $rules = array(
-            'name' => 'required|string|max:20',
-            'email' => 'required|email|max:50',
-            'phone' => 'required|integer|digits:10',
+            'time' => 'required|date|unique:ap_appointments,time',
         );
 
         $validator = \Validator::make($inputs, $rules);
@@ -642,7 +640,12 @@ class Patient extends VaahModel
     //-------------------------------------------------
     //-------------------------------------------------
 
-    public function appointments(){
-        return $this->hasMany(Appointment::class,'patient_id','id');
+    public function patients(){
+        return $this->belongsTo(Patient::class);
     }
+
+    public function doctors(){
+        return $this->belongsTo(Doctor::class);
+    }
+
 }
