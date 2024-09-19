@@ -158,7 +158,7 @@ const toggleFormMenu = (event) => {
                         />
                     </div>
                 </VhField>
-                {{store.assets}}
+<!--                {{store.assets.empty_item.appointments}}-->
                 <VhField label="Start Time">
                     <div class="p-inputgroup">
                         <Calendar v-model="store.item.time" show-time/>

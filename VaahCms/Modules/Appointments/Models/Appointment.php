@@ -640,11 +640,11 @@ class Appointment extends VaahModel
     //-------------------------------------------------
     //-------------------------------------------------
 
-    public function patients(){
+    public function patient(){
         return $this->belongsTo(Patient::class);
     }
 
-    public function doctors(){
+    public function doctor(){
         return $this->belongsTo(Doctor::class);
     }
 
