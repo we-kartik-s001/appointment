@@ -479,29 +479,29 @@ class Doctor extends VaahModel
             return $validation;
         }
 
-        // check if name exist
-        $item = self::where('id', '!=', $id)
-            ->withTrashed()
-            ->where('name', $inputs['name'])->first();
-
-         if ($item) {
-             $error_message = "This name is already exist".($item->deleted_at?' in trash.':'.');
-             $response['success'] = false;
-             $response['errors'][] = $error_message;
-             return $response;
-         }
-
-         // check if slug exist
-         $item = self::where('id', '!=', $id)
-             ->withTrashed()
-             ->where('slug', $inputs['slug'])->first();
-
-         if ($item) {
-             $error_message = "This slug is already exist".($item->deleted_at?' in trash.':'.');
-             $response['success'] = false;
-             $response['errors'][] = $error_message;
-             return $response;
-         }
+//        // check if name exist
+//        $item = self::where('id', '!=', $id)
+//            ->withTrashed()
+//            ->where('name', $inputs['name'])->first();
+//
+//         if ($item) {
+//             $error_message = "This name is already exist".($item->deleted_at?' in trash.':'.');
+//             $response['success'] = false;
+//             $response['errors'][] = $error_message;
+//             return $response;
+//         }
+//
+//         // check if slug exist
+//         $item = self::where('id', '!=', $id)
+//             ->withTrashed()
+//             ->where('slug', $inputs['slug'])->first();
+//
+//         if ($item) {
+//             $error_message = "This slug is already exist".($item->deleted_at?' in trash.':'.');
+//             $response['success'] = false;
+//             $response['errors'][] = $error_message;
+//             return $response;
+//         }
 
         $item = self::where('id', $id)->withTrashed()->first();
         $item->fill($inputs);
@@ -568,7 +568,7 @@ class Doctor extends VaahModel
             'phone' => 'required|integer|digits:10',
             'specialization' => 'required|string|max:50',
             'start_time' => 'required|date',
-            'end_time' => 'required|date|different:start_time',
+            'end_time' => 'required|date|different:start_time|after:start_time',
         );
 
         $validator = \Validator::make($inputs, $rules);
