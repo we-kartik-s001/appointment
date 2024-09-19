@@ -1,5 +1,5 @@
 <script setup>
-import {onMounted, ref, watch} from "vue";
+import { onMounted, ref} from "vue";
 import { useAppointmentStore } from '../../stores/store-appointments'
 
 import VhField from './../../vaahvue/vue-three/primeflex/VhField.vue'
@@ -134,12 +134,13 @@ const toggleFormMenu = (event) => {
 
                 </Message>
 
-
                 <VhField label="Name">
                     <div class="p-inputgroup">
                         <Dropdown class="w-full"
                                   v-model= store.item.patients
                                   :options = store.assets.empty_item.patients
+                                  optionLabel= "name"
+                                  optionValue= "id"
                                   placeholder="Select Your Name"
                                   name="appointments-name"
                                   data-testid="appointments-name"
@@ -152,6 +153,8 @@ const toggleFormMenu = (event) => {
                         <Dropdown class="w-full"
                                   v-model= store.item.doctors
                                   :options= store.assets.empty_item.doctors
+                                  optionLabel= "name"
+                                  optionValue= "id"
                                   placeholder="Select Doctor"
                                   name="appointments-doctor"
                                   data-testid="appointments-doctor"

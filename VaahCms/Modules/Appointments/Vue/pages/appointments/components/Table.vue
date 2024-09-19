@@ -63,8 +63,8 @@ const useVaah = vaah();
                      <Badge v-if="prop.data.deleted_at"
                             value="Trashed"
                             severity="danger"></Badge>
-                     Jason
-<!--                     {{prop.data.appointments[0].doctor.name}}-->
+<!--                     Jason-->
+                     {{prop.data.appointments}}
                  </template>
 
              </Column>
