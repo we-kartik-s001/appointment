@@ -2,6 +2,7 @@
 
 use App\Mail\NotifyDoctorsOfCancelledAppointments;
 use App\Mail\NotifyDoctorsOfNewAppointments;
+use App\Mail\NotifyDoctorsOfUpdatedAppointment;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
@@ -171,7 +172,7 @@ class Appointment extends VaahModel
         $doctor_email = Doctor::where('id',$inputs['doctor_id'])->pluck('email');
         $patient_details = Patient::where('id',$inputs['patient_id'])->first();
         if($doctor_email){
-            Mail::to($doctor_email)->send(new NotifyDoctorsOfNewAppointments($patient_details));
+            Mail::to($doctor_email)->send(new NotifyDoctorsOfNewAppointments($patient_details,$inputs['date_time']));
         }
 
         $response = self::getItem($item->id);
@@ -500,6 +501,11 @@ class Appointment extends VaahModel
         $item = self::where('id', $id)->withTrashed()->first();
         $item->fill($inputs);
         $item->save();
+        $doctor_email = Doctor::where('id',$inputs['doctor_id'])->pluck('email');
+        $patient_details = Patient::where('id',$inputs['patient_id'])->first();
+        if($doctor_email){
+            Mail::to($doctor_email)->send(new NotifyDoctorsOfUpdatedAppointment($patient_details,$inputs['date_time']));
+        }
 
         $response = self::getItem($item->id);
         $response['messages'][] = trans("vaahcms-general.saved_successfully");
