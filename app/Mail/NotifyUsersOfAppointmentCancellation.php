@@ -8,9 +8,8 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use Carbon\Carbon;
 
-class NotifyDoctorsOfUpdatedAppointment extends Mailable
+class NotifyUsersOfAppointmentCancellation extends Mailable
 {
     use Queueable, SerializesModels;
     protected $patient_details, $time;
@@ -29,7 +28,7 @@ class NotifyDoctorsOfUpdatedAppointment extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Appointment Rescheduled '
+            subject: 'Appointment Cancelled',
         );
     }
 
@@ -39,11 +38,11 @@ class NotifyDoctorsOfUpdatedAppointment extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.notifyDoctorsOfUpdatedAppointment',
+            markdown: 'emails.appointmentCancellation',
             with: [
                 'patient' => $this->patient_details,
-                'time' => Carbon::parse($this->time)->format('Y-m-d H:i:s')
-            ],
+                'time' => $this->time
+            ]
         );
     }
 

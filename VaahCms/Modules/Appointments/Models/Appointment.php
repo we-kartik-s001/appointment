@@ -3,6 +3,7 @@
 use App\Mail\NotifyDoctorsOfCancelledAppointments;
 use App\Mail\NotifyDoctorsOfNewAppointments;
 use App\Mail\NotifyDoctorsOfUpdatedAppointment;
+use App\Mail\NotifyUsersOfAppointmentCancellation;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
@@ -292,7 +293,7 @@ class Appointment extends VaahModel
     //-------------------------------------------------
     public static function updateList($request)
     {
-
+        dd('request reached');
         $inputs = $request->all();
 
         $rules = array(
@@ -532,6 +533,11 @@ class Appointment extends VaahModel
     //-------------------------------------------------
     public static function itemAction($request, $id, $type): array
     {
+        $users = Appointment::select('doctor_id','patient_id','date_time')->where('id',$id)->get();
+        $time = $users[0]['date_time'];
+        $doctor_email = Doctor::where('id',$users[0]['doctor_id'])->pluck('email');
+//        dd($doctor_email);
+        $patient_details = Patient::where('id',$users[0]['patient_id'])->first();
         switch($type)
         {
             case 'activate':
@@ -547,6 +553,7 @@ class Appointment extends VaahModel
             case 'trash':
                 self::find($id)
                     ->delete();
+                Mail::to($doctor_email)->send(new NotifyUsersOfAppointmentCancellation($patient_details,$time));
                 break;
             case 'restore':
                 self::where('id', $id)
