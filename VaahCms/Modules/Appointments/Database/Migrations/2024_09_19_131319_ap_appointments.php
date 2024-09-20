@@ -19,8 +19,7 @@ class ApAppointments extends Migration
                 $table->id()->index();
                 $table->unsignedTinyInteger('doctor_id');
                 $table->unsignedTinyInteger('patient_id');
-                $table->timestamp('date');
-                $table->timestamp('time');
+                $table->dateTime('date_time');
                 $table->tinyInteger('status')->default(1);
                 $table->string('reason')->nullable();
                 $table->timestamps();

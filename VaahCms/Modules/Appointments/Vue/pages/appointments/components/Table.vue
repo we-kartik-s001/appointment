@@ -8,11 +8,12 @@ const useVaah = vaah();
 </script>
 
 <template>
-<!--    {{store}}-->
+<!--    {{store.list.data}}-->
 <!--    {{store.assets.empty_item.appointments}}-->
     <div v-if="store.list">
+<!--        {{store.list.data}}-->
         <!--table-->
-         <DataTable :value="store.assets.empty_item.appointments"
+         <DataTable :value="store.list.data"
                    dataKey="id"
                    :rowClass="store.setRowClass"
                    class="p-datatable-sm p-datatable-hoverable-rows"
@@ -37,23 +38,23 @@ const useVaah = vaah();
                     <Badge v-if="prop.data.deleted_at"
                            value="Trashed"
                            severity="danger"></Badge>
-                    {{prop.data.name}}
+                    {{prop.data.patient_id}}
                 </template>
 
             </Column>
 
-             <Column field="email" header="Email"
-                     class="overflow-wrap-anywhere"
-                     :sortable="true">
+<!--             <Column field="email" header="Email"-->
+<!--                     class="overflow-wrap-anywhere"-->
+<!--                     :sortable="true">-->
 
-                 <template #body="prop">
-                     <Badge v-if="prop.data.deleted_at"
-                            value="Trashed"
-                            severity="danger"></Badge>
-                     {{prop.data.email}}
-                 </template>
+<!--                 <template #body="prop">-->
+<!--                     <Badge v-if="prop.data.deleted_at"-->
+<!--                            value="Trashed"-->
+<!--                            severity="danger"></Badge>-->
+<!--                     {{prop.data.doctor_id}}-->
+<!--                 </template>-->
 
-             </Column>
+<!--             </Column>-->
 
              <Column field="doctor" header="Doctor"
                      class="overflow-wrap-anywhere"
@@ -64,12 +65,12 @@ const useVaah = vaah();
                             value="Trashed"
                             severity="danger"></Badge>
 <!--                     Jason-->
-                     {{prop.data.appointments}}
+                     {{prop.data.doctor_id}}
                  </template>
 
              </Column>
 
-             <Column field="time" header="Time Slot"
+             <Column field="slot" header="Slot"
                      class="overflow-wrap-anywhere"
                      :sortable="true">
 
@@ -77,11 +78,25 @@ const useVaah = vaah();
                      <Badge v-if="prop.data.deleted_at"
                             value="Trashed"
                             severity="danger"></Badge>
-                     Time
-<!--                     {{prop.data.appointments[0].reason}}-->
+                     <!--                     Jason-->
+                     {{prop.data.date_time}}
                  </template>
 
              </Column>
+
+<!--             <Column field="time" header="Time Slot"-->
+<!--                     class="overflow-wrap-anywhere"-->
+<!--                     :sortable="true">-->
+
+<!--                 <template #body="prop">-->
+<!--                     <Badge v-if="prop.data.deleted_at"-->
+<!--                            value="Trashed"-->
+<!--                            severity="danger"></Badge>-->
+<!--                     Time-->
+<!--&lt;!&ndash;                     {{prop.data.appointments[0].reason}}&ndash;&gt;-->
+<!--                 </template>-->
+
+<!--             </Column>-->
 
              <Column field="status" header="Status"
                      class="overflow-wrap-anywhere"
@@ -91,8 +106,7 @@ const useVaah = vaah();
                      <Badge v-if="prop.data.deleted_at"
                             value="Trashed"
                             severity="danger"></Badge>
-                     Status
-                     <!--                     {{prop.data.appointments[0].reason}}-->
+                  {{prop.data.status ? 'Booked' : 'Cancelled'}}
                  </template>
 
              </Column>

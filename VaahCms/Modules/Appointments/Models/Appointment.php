@@ -1,14 +1,19 @@
 <?php namespace VaahCms\Modules\Appointments\Models;
 
+use App\Mail\NotifyDoctorsOfCancelledAppointments;
+use App\Mail\NotifyDoctorsOfNewAppointments;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Faker\Factory;
 use WebReinvent\VaahCms\Models\VaahModel;
 use WebReinvent\VaahCms\Traits\CrudWithUuidObservantTrait;
 use WebReinvent\VaahCms\Models\User;
 use WebReinvent\VaahCms\Libraries\VaahSeeder;
+use Illuminate\Validation\Rule;
+use Carbon\Carbon;
 
 class Appointment extends VaahModel
 {
@@ -27,8 +32,9 @@ class Appointment extends VaahModel
     //-------------------------------------------------
     protected $fillable = [
         'id',
-        'time',
-        'status'
+        'patient_id',
+        'doctor_id',
+        'date_time',
     ];
     //-------------------------------------------------
     protected $fill_except = [
@@ -143,7 +149,14 @@ class Appointment extends VaahModel
     //-------------------------------------------------
     public static function createItem($request)
     {
-
+//        $checkStatus = self::checkAppointmentTime($request->input('date_time'));
+//        dd($checkStatus);
+//        if($checkStatus){
+//            return $response['messages'][] = 'Slot not available. Please select another slot.';
+//        }
+//        if(Appointment::find($request->input('date_time'))){
+//           return $response['messages'][] = 'Appointment Already Booked';
+//        }
         $inputs = $request->all();
 
         $validation = self::validation($inputs);
@@ -151,31 +164,15 @@ class Appointment extends VaahModel
             return $validation;
         }
 
-
-//        // check if name exist
-//        $item = self::where('name', $inputs['name'])->withTrashed()->first();
-//
-//        if ($item) {
-//            $error_message = "This name is already exist".($item->deleted_at?' in trash.':'.');
-//            $response['success'] = false;
-//            $response['messages'][] = $error_message;
-//            return $response;
-//        }
-//
-//        // check if slug exist
-//        $item = self::where('slug', $inputs['slug'])->withTrashed()->first();
-//
-//        if ($item) {
-//            $error_message = "This slug is already exist".($item->deleted_at?' in trash.':'.');
-//            $response['success'] = false;
-//            $response['messages'][] = $error_message;
-//            return $response;
-//        }
-
         $item = new self();
+        $item->status = 1; //keeping the status booked by default upon creation
         $item->fill($inputs);
-        $item->status = 1; //keeping the status booked by default
         $item->save();
+        $doctor_email = Doctor::where('id',$inputs['doctor_id'])->pluck('email');
+        $patient_details = Patient::where('id',$inputs['patient_id'])->first();
+        if($doctor_email){
+            Mail::to($doctor_email)->send(new NotifyDoctorsOfNewAppointments($patient_details));
+        }
 
         $response = self::getItem($item->id);
         $response['messages'][] = trans("vaahcms-general.saved_successfully");
@@ -476,29 +473,29 @@ class Appointment extends VaahModel
             return $validation;
         }
 
-        // check if name exist
-        $item = self::where('id', '!=', $id)
-            ->withTrashed()
-            ->where('name', $inputs['name'])->first();
-
-         if ($item) {
-             $error_message = "This name is already exist".($item->deleted_at?' in trash.':'.');
-             $response['success'] = false;
-             $response['errors'][] = $error_message;
-             return $response;
-         }
-
-         // check if slug exist
-         $item = self::where('id', '!=', $id)
-             ->withTrashed()
-             ->where('slug', $inputs['slug'])->first();
-
-         if ($item) {
-             $error_message = "This slug is already exist".($item->deleted_at?' in trash.':'.');
-             $response['success'] = false;
-             $response['errors'][] = $error_message;
-             return $response;
-         }
+//        // check if name exist
+//        $item = self::where('id', '!=', $id)
+//            ->withTrashed()
+//            ->where('name', $inputs['name'])->first();
+//
+//         if ($item) {
+//             $error_message = "This name is already exist".($item->deleted_at?' in trash.':'.');
+//             $response['success'] = false;
+//             $response['errors'][] = $error_message;
+//             return $response;
+//         }
+//
+//         // check if slug exist
+//         $item = self::where('id', '!=', $id)
+//             ->withTrashed()
+//             ->where('slug', $inputs['slug'])->first();
+//
+//         if ($item) {
+//             $error_message = "This slug is already exist".($item->deleted_at?' in trash.':'.');
+//             $response['success'] = false;
+//             $response['errors'][] = $error_message;
+//             return $response;
+//         }
 
         $item = self::where('id', $id)->withTrashed()->first();
         $item->fill($inputs);
@@ -558,9 +555,11 @@ class Appointment extends VaahModel
 
     public static function validation($inputs)
     {
-
+//        dd($inputs['id']);
         $rules = array(
-            'time' => 'required|date|unique:ap_appointments,time',
+            'patient_id' => 'required',
+            'doctor_id' => 'required',
+            'date_time' => ['required','date',Rule::unique('ap_appointments')->ignore($inputs['id'])]
         );
 
         $validator = \Validator::make($inputs, $rules);
@@ -646,6 +645,17 @@ class Appointment extends VaahModel
 
     public function doctor(){
         return $this->belongsTo(Doctor::class);
+    }
+
+    public static function checkAppointmentTime($dateTime)
+    {
+        $dateTime = Carbon::parse($dateTime);
+
+        $appointments = Appointment::where(function ($query) use ($dateTime) {
+            $query->whereBetween('date_time', [$dateTime->copy()->subMinutes(15), $dateTime->copy()->addMinutes(15)]);
+        })->get();
+
+        return $appointments->isEmpty(); // Returns true if no overlapping appointments
     }
 
 }

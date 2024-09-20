@@ -133,17 +133,17 @@ const toggleFormMenu = (event) => {
                     </div>
 
                 </Message>
-
+<!--{{store.item.patient_id}}-->
                 <VhField label="Name">
                     <div class="p-inputgroup">
                         <Dropdown class="w-full"
-                                  v-model= store.item.patients
+                                  v-model= store.item.patient_id
                                   :options = store.assets.empty_item.patients
                                   optionLabel= "name"
-                                  optionValue= "id"
+                                  optionValue="id"
                                   placeholder="Select Your Name"
-                                  name="appointments-name"
-                                  data-testid="appointments-name"
+                                  name="appointments-patient_id"
+                                  data-testid="appointments-patient_id"
                         />
                     </div>
                 </VhField>
@@ -151,20 +151,20 @@ const toggleFormMenu = (event) => {
                 <VhField label="Doctor">
                     <div class="p-inputgroup">
                         <Dropdown class="w-full"
-                                  v-model= store.item.doctors
+                                  v-model= store.item.doctor_id
                                   :options= store.assets.empty_item.doctors
                                   optionLabel= "name"
-                                  optionValue= "id"
+                                  optionValue="id"
                                   placeholder="Select Doctor"
-                                  name="appointments-doctor"
-                                  data-testid="appointments-doctor"
+                                  name="appointments-doctor_id"
+                                  data-testid="appointments-doctor_id"
                         />
                     </div>
                 </VhField>
-<!--                {{store.assets.empty_item.appointments}}-->
+
                 <VhField label="Start Time">
                     <div class="p-inputgroup">
-                        <Calendar v-model="store.item.time" show-time/>
+                        <Calendar v-model="store.item.date_time" show-time/>
                         <div class="required-field hidden"></div>
                     </div>
                 </VhField>
