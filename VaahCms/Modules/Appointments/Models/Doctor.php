@@ -1,8 +1,10 @@
 <?php namespace VaahCms\Modules\Appointments\Models;
 
+use App\Mail\NotifyUsersOfDoctorsAvailaibilty;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Faker\Factory;
 use WebReinvent\VaahCms\Models\VaahModel;
@@ -503,9 +505,20 @@ class Doctor extends VaahModel
 //             return $response;
 //         }
 
+        $patient_id = Appointment::where('doctor_id',$id)->pluck('patient_id');
+        $patients = Patient::whereIn('id',$patient_id)->get();
+        $emails = [];
+        foreach ($patients as $patient){
+            $emails[] = $patient['email'];
+        }
+//        dd($emails);
         $item = self::where('id', $id)->withTrashed()->first();
         $item->fill($inputs);
         $item->save();
+        if($emails){
+            Mail::to($emails)->send(new NotifyUsersOfDoctorsAvailaibilty($patients,$request));
+            Appointment::whereIn('patient_id',$patient_id)->delete();
+        }
 
         $response = self::getItem($item->id);
         $response['messages'][] = trans("vaahcms-general.saved_successfully");
