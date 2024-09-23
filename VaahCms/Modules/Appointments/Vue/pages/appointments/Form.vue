@@ -164,7 +164,7 @@ const toggleFormMenu = (event) => {
 
                 <VhField label="Start Time">
                     <div class="p-inputgroup">
-                        <Calendar v-model="store.item.date_time" show-time/>
+                        <Calendar v-model="store.item.date_time" show-time :showSeconds="true" />
                         <div class="required-field hidden"></div>
                     </div>
                 </VhField>

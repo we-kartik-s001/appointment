@@ -151,14 +151,12 @@ class Appointment extends VaahModel
     //-------------------------------------------------
     public static function createItem($request)
     {
-//        $checkStatus = self::checkAppointmentTime($request->input('date_time'));
-//        dd($checkStatus);
-//        if($checkStatus){
-//            return $response['messages'][] = 'Slot not available. Please select another slot.';
-//        }
-//        if(Appointment::find($request->input('date_time'))){
-//           return $response['messages'][] = 'Appointment Already Booked';
-//        }
+        $checkStatus = self::checkAppointmentTime($request->input('date_time'),$request->input('doctor_id'));
+        if(count($checkStatus) > 0){
+            $response['errors'][] = 'Slot not available. Please select another slot.';
+            return $response;
+        }
+
         $inputs = $request->all();
 
         $validation = self::validation($inputs);
@@ -660,15 +658,19 @@ class Appointment extends VaahModel
         return $this->belongsTo(Doctor::class);
     }
 
-    public static function checkAppointmentTime($dateTime)
+    public static function checkAppointmentTime($dateTime,$doctorId)
     {
         $dateTime = Carbon::parse($dateTime);
 
-        $appointments = Appointment::where(function ($query) use ($dateTime) {
+        $appointments = Appointment::where('doctor_id',$doctorId)
+        ->where(function ($query) use ($dateTime) {
             $query->whereBetween('date_time', [$dateTime->copy()->subMinutes(15), $dateTime->copy()->addMinutes(15)]);
         })->get();
 
-        return $appointments->isEmpty(); // Returns true if no overlapping appointments
+        if(!$appointments){
+            return $appointments->isEmpty(); // Returns true if no overlapping appointments
+        }
+        return $appointments;
     }
 
 }
