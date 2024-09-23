@@ -1,6 +1,7 @@
 <?php namespace VaahCms\Modules\Appointments\Models;
 
 use App\Mail\NotifyUsersOfDoctorsAvailaibilty;
+use Carbon\Carbon;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
@@ -180,6 +181,8 @@ class Doctor extends VaahModel
 
         $item = new self();
         $item->fill($inputs);
+        $item->start_time = Carbon::parse($inputs['start_time'])->setTimeZone('Asia/Kolkata');
+        $item->end_time = Carbon::parse($inputs['end_time'])->setTimeZone('Asia/Kolkata');
         $item->save();
 
         $response = self::getItem($item->id);
@@ -514,6 +517,8 @@ class Doctor extends VaahModel
 //        dd($emails);
         $item = self::where('id', $id)->withTrashed()->first();
         $item->fill($inputs);
+        $item->start_time = Carbon::parse($inputs['start_time'])->setTimeZone('Asia/Kolkata');
+        $item->end_time = Carbon::parse($inputs['end_time'])->setTimeZone('Asia/Kolkata');
         $item->save();
         if($emails){
             Mail::to($emails)->send(new NotifyUsersOfDoctorsAvailaibilty($patients,$request));

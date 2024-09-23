@@ -152,7 +152,7 @@ class Appointment extends VaahModel
     public static function createItem($request)
     {
         $inputs = $request->all();
-        $checkStatus = self::checkAppointmentTime($inputs['date_time'],$inputs['doctor_id']);
+        $checkStatus = self::checkAppointmentTime(Carbon::parse($inputs['date_time'])->timezone('Asia/Kolkata'),$inputs['doctor_id']);
         if(count($checkStatus) > 0){
             if(array_key_exists('message',$checkStatus)){
                 $response['errors'][] = $checkStatus['message'];
@@ -171,6 +171,7 @@ class Appointment extends VaahModel
         $item = new self();
         $item->status = 1; //keeping the status booked by default upon creation
         $item->fill($inputs);
+        $item->date_time = Carbon::parse($inputs['date_time'])->setTimeZone('Asia/Kolkata');
         $item->save();
         $doctor_email = Doctor::where('id',$inputs['doctor_id'])->pluck('email');
         $patient_details = Patient::where('id',$inputs['patient_id'])->first();
@@ -473,7 +474,7 @@ class Appointment extends VaahModel
     {
         $inputs = $request->all();
 
-        $checkStatus = self::checkAppointmentTime($inputs['date_time'],$inputs['doctor_id']);
+        $checkStatus = self::checkAppointmentTime(Carbon::parse($inputs['date_time'])->timezone('Asia/Kolkata'),$inputs['doctor_id']);
         if(count($checkStatus) > 0){
             if(array_key_exists('message',$checkStatus)){
                 $response['errors'][] = $checkStatus['message'];
@@ -515,11 +516,12 @@ class Appointment extends VaahModel
 
         $item = self::where('id', $id)->withTrashed()->first();
         $item->fill($inputs);
+        $item->date_time = Carbon::parse($inputs['date_time'])->setTimeZone('Asia/Kolkata');
         $item->save();
         $doctor_email = Doctor::where('id',$inputs['doctor_id'])->pluck('email');
         $patient_details = Patient::where('id',$inputs['patient_id'])->first();
         if($doctor_email){
-            Mail::to($doctor_email)->send(new NotifyDoctorsOfUpdatedAppointment($patient_details,$inputs['date_time']));
+            Mail::to($doctor_email)->send(new NotifyDoctorsOfUpdatedAppointment($patient_details,Carbon::parse($inputs['date_time'])->setTimeZone('Asia/Kolkata')));
         }
 
         $response = self::getItem($item->id);
@@ -676,6 +678,7 @@ class Appointment extends VaahModel
 
     public static function checkAppointmentTime($dateTime,$doctorId)
     {
+        //This code will help us to keep track that no appointment corresponding to a doctor should be created which falls within 15 min of other person's slot
         $dateTime = Carbon::parse($dateTime);
         $start_time = json_decode(Doctor::where('id',$doctorId)->pluck('start_time'));
         $end_time = json_decode(Doctor::where('id',$doctorId)->pluck('end_time'));
@@ -693,7 +696,7 @@ class Appointment extends VaahModel
         if(!$appointments){
             return $appointments->isEmpty(); // Returns true if no overlapping appointments
         }
-        return $appointments;
+        return $appointments->toArray();
     }
 
 }
