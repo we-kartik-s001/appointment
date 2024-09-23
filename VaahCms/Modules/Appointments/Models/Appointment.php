@@ -151,13 +151,17 @@ class Appointment extends VaahModel
     //-------------------------------------------------
     public static function createItem($request)
     {
-        $checkStatus = self::checkAppointmentTime($request->input('date_time'),$request->input('doctor_id'));
+        $inputs = $request->all();
+        $checkStatus = self::checkAppointmentTime($inputs['date_time'],$inputs['doctor_id']);
         if(count($checkStatus) > 0){
-            $response['errors'][] = 'Slot not available. Please select another slot.';
+            if(array_key_exists('message',$checkStatus)){
+                $response['errors'][] = $checkStatus['message'];
+            }
+            else{
+                $response['errors'][] = 'Slot not available. Please select another slot.';
+            }
             return $response;
         }
-
-        $inputs = $request->all();
 
         $validation = self::validation($inputs);
         if (!$validation['success']) {
@@ -278,6 +282,7 @@ class Appointment extends VaahModel
             $rows = $request->rows;
         }
 
+        $list = $list->with('doctor','patient');
         $list = $list->paginate($rows);
 
         $response['success'] = true;
@@ -467,6 +472,17 @@ class Appointment extends VaahModel
     public static function updateItem($request, $id)
     {
         $inputs = $request->all();
+
+        $checkStatus = self::checkAppointmentTime($inputs['date_time'],$inputs['doctor_id']);
+        if(count($checkStatus) > 0){
+            if(array_key_exists('message',$checkStatus)){
+                $response['errors'][] = $checkStatus['message'];
+            }
+            else{
+                $response['errors'][] = 'Slot not available. Please select another slot.';
+            }
+            return $response;
+        }
 
         $validation = self::validation($inputs);
         if (!$validation['success']) {
@@ -661,6 +677,13 @@ class Appointment extends VaahModel
     public static function checkAppointmentTime($dateTime,$doctorId)
     {
         $dateTime = Carbon::parse($dateTime);
+        $start_time = json_decode(Doctor::where('id',$doctorId)->pluck('start_time'));
+        $end_time = json_decode(Doctor::where('id',$doctorId)->pluck('end_time'));
+
+        if($dateTime->lt($start_time[0]) || $dateTime->gt($end_time[0])){
+            $appointments['message'] = 'You are attempting to book the slot when doctor will be away. Please select a valid slot.';
+            return $appointments;
+        }
 
         $appointments = Appointment::where('doctor_id',$doctorId)
         ->where(function ($query) use ($dateTime) {

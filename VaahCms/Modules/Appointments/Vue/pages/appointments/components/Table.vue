@@ -4,14 +4,11 @@ import { useAppointmentStore } from '../../../stores/store-appointments'
 
 const store = useAppointmentStore();
 const useVaah = vaah();
-
+// console.log(store);
 </script>
 
 <template>
-<!--    {{store.list.data}}-->
-<!--    {{store.assets.empty_item.appointments}}-->
     <div v-if="store.list">
-<!--        {{store.list.data}}-->
         <!--table-->
          <DataTable :value="store.list.data"
                    dataKey="id"
@@ -38,23 +35,10 @@ const useVaah = vaah();
                     <Badge v-if="prop.data.deleted_at"
                            value="Trashed"
                            severity="danger"></Badge>
-                    {{prop.data.patient_id}}
+                    {{prop.data.patient.name}}
                 </template>
 
             </Column>
-
-<!--             <Column field="email" header="Email"-->
-<!--                     class="overflow-wrap-anywhere"-->
-<!--                     :sortable="true">-->
-
-<!--                 <template #body="prop">-->
-<!--                     <Badge v-if="prop.data.deleted_at"-->
-<!--                            value="Trashed"-->
-<!--                            severity="danger"></Badge>-->
-<!--                     {{prop.data.doctor_id}}-->
-<!--                 </template>-->
-
-<!--             </Column>-->
 
              <Column field="doctor" header="Doctor"
                      class="overflow-wrap-anywhere"
@@ -64,8 +48,7 @@ const useVaah = vaah();
                      <Badge v-if="prop.data.deleted_at"
                             value="Trashed"
                             severity="danger"></Badge>
-<!--                     Jason-->
-                     {{prop.data.doctor_id}}
+                     {{prop.data.doctor.name}} - {{prop.data.doctor.specialization}}
                  </template>
 
              </Column>
@@ -78,25 +61,10 @@ const useVaah = vaah();
                      <Badge v-if="prop.data.deleted_at"
                             value="Trashed"
                             severity="danger"></Badge>
-                     <!--                     Jason-->
                      {{prop.data.date_time}}
                  </template>
 
              </Column>
-
-<!--             <Column field="time" header="Time Slot"-->
-<!--                     class="overflow-wrap-anywhere"-->
-<!--                     :sortable="true">-->
-
-<!--                 <template #body="prop">-->
-<!--                     <Badge v-if="prop.data.deleted_at"-->
-<!--                            value="Trashed"-->
-<!--                            severity="danger"></Badge>-->
-<!--                     Time-->
-<!--&lt;!&ndash;                     {{prop.data.appointments[0].reason}}&ndash;&gt;-->
-<!--                 </template>-->
-
-<!--             </Column>-->
 
              <Column field="status" header="Status"
                      class="overflow-wrap-anywhere"
@@ -111,7 +79,6 @@ const useVaah = vaah();
 
              </Column>
 
-
                 <Column field="created_at" header="Created At"
                         v-if="store.isViewLarge()"
                         style="width:150px;"
@@ -122,22 +89,6 @@ const useVaah = vaah();
                     </template>
 
                 </Column>
-
-<!--            <Column field="is_active" v-if="store.isViewLarge()"-->
-<!--                    :sortable="true"-->
-<!--                    style="width:100px;"-->
-<!--                    header="Is Active">-->
-
-<!--                <template #body="prop">-->
-<!--                    <InputSwitch v-model.bool="prop.data.is_active"-->
-<!--                                 data-testid="appointments-table-is-active"-->
-<!--                                 v-bind:false-value="0"  v-bind:true-value="1"-->
-<!--                                 class="p-inputswitch-sm"-->
-<!--                                 @input="store.toggleIsActive(prop.data)">-->
-<!--                    </InputSwitch>-->
-<!--                </template>-->
-
-<!--            </Column>-->
 
             <Column field="actions" style="width:150px;"
                     :style="{width: store.getActionWidth() }"

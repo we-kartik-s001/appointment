@@ -34,7 +34,7 @@ class AppointmentsController extends Controller
             $data['empty_item'] = Appointment::getEmptyItem();
             $data['empty_item']['patients'] = Patient::all();
             $data['empty_item']['doctors'] = Doctor::all();
-            $data['empty_item']['appointments']=Patient::with('appointments.doctor')->get();
+            $data['empty_item']['appointments']=Appointment::with('doctor','patient')->get();
             $data['actions'] = [];
 
             $response['success'] = true;
