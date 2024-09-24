@@ -5,7 +5,6 @@ import {addMinutes} from 'date-fns';
 
 const store = useAppointmentStore();
 const useVaah = vaah();
-// console.log(store);
 </script>
 
 <template>

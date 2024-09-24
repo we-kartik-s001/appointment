@@ -20,7 +20,7 @@ class ApAppointments extends Migration
                 $table->unsignedTinyInteger('doctor_id')->nullable();
                 $table->unsignedTinyInteger('patient_id')->nullable();
                 $table->dateTime('date_time')->nullable();
-                $table->tinyInteger('status')->default(1)->nullable();
+                $table->tinyInteger('status')->nullable();
                 $table->string('reason')->nullable();
                 $table->timestamps();
                 $table->softDeletes();
