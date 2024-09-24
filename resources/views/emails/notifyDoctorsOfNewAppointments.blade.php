@@ -6,7 +6,7 @@ A new appoinment has been scehduled. Please refer to the details of patient belo
     Name: {{$patient['name']}}<br>
     Email: {{$patient['email']}}<br>
     Phone: {{$patient['phone']}}<br>
-    Time Slot: {{$time}}
+    Time Slot: {{$time['start_time']}} - {{$time['end_time']}}
 
 Thanks,<br>
 {{ config('app.name') }}

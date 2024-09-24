@@ -42,7 +42,10 @@ class NotifyDoctorsOfNewAppointments extends Mailable
             markdown: 'emails.notifyDoctorsOfNewAppointments',
             with: [
                 'patient' => $this->patient_details,
-                'time' => Carbon::parse($this->time)->format('Y-m-d H:i:s')
+                'time' => [
+                            'start_time' => Carbon::parse($this->time)->format('Y-m-d H:i:s'),
+                            'end_time' => Carbon::parse($this->time)->addMinute(15)->format('Y-m-d H:i:s')
+                    ]
             ],
         );
     }

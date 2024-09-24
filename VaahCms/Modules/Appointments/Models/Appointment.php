@@ -176,7 +176,7 @@ class Appointment extends VaahModel
         $doctor_email = Doctor::where('id',$inputs['doctor_id'])->pluck('email');
         $patient_details = Patient::where('id',$inputs['patient_id'])->first();
         if($doctor_email){
-            Mail::to($doctor_email)->send(new NotifyDoctorsOfNewAppointments($patient_details,$inputs['date_time']));
+            Mail::to($doctor_email)->send(new NotifyDoctorsOfNewAppointments($patient_details,Carbon::parse($inputs['date_time'])->timezone('Asia/Kolkata')));
         }
 
         $response = self::getItem($item->id);
@@ -679,7 +679,7 @@ class Appointment extends VaahModel
     public static function checkAppointmentTime($dateTime,$doctorId)
     {
         //This code will help us to keep track that no appointment corresponding to a doctor should be created which falls within 15 min of other person's slot
-        $dateTime = Carbon::parse($dateTime);
+        $dateTime = Carbon::parse(Carbon::createFromFormat('Y-m-d H:i:s',$dateTime));
         $start_time = json_decode(Doctor::where('id',$doctorId)->pluck('start_time'));
         $end_time = json_decode(Doctor::where('id',$doctorId)->pluck('end_time'));
 
