@@ -1,6 +1,7 @@
 <script setup>
 import { vaah } from '../../../vaahvue/pinia/vaah'
 import { useAppointmentStore } from '../../../stores/store-appointments'
+import {addMinutes} from 'date-fns';
 
 const store = useAppointmentStore();
 const useVaah = vaah();
@@ -61,7 +62,7 @@ const useVaah = vaah();
                      <Badge v-if="prop.data.deleted_at"
                             value="Trashed"
                             severity="danger"></Badge>
-                     {{prop.data.date_time}}
+                     {{new Date(prop.data.date_time).toLocaleTimeString()}} - {{new Date(addMinutes(new Date(prop.data.date_time),15)).toLocaleTimeString()}}
                  </template>
 
              </Column>

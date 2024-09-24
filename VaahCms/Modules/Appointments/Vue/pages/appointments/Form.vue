@@ -133,7 +133,7 @@ const toggleFormMenu = (event) => {
                     </div>
 
                 </Message>
-<!--{{store.item.patient_id}}-->
+
                 <VhField label="Name">
                     <div class="p-inputgroup">
                         <Dropdown class="w-full"
@@ -162,9 +162,10 @@ const toggleFormMenu = (event) => {
                     </div>
                 </VhField>
 
-                <VhField label="Start Time">
+                <VhField label="Select Time">
                     <div class="p-inputgroup">
-                        <Calendar v-model="store.item.date_time" show-time :showSeconds="true" />
+                    <Calendar id="calendar-12h" v-model="store.item.date_time" showTime hourFormat="12" timeOnly/>
+<!--                        <Calendar v-model="store.item.date_time" show-time :showSeconds="true" />-->
                         <div class="required-field hidden"></div>
                     </div>
                 </VhField>
