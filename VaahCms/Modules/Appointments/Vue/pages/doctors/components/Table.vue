@@ -88,7 +88,7 @@ const useVaah = vaah();
                      <Badge v-if="prop.data.deleted_at"
                             value="Trashed"
                             severity="danger"></Badge>
-                     {{prop.data.start_time}}
+                     {{new Date(prop.data.start_time).toLocaleTimeString()}}
                  </template>
 
              </Column>
@@ -101,7 +101,7 @@ const useVaah = vaah();
                      <Badge v-if="prop.data.deleted_at"
                             value="Trashed"
                             severity="danger"></Badge>
-                     {{prop.data.end_time}}
+                     {{new Date(prop.data.end_time).toLocaleTimeString()}}
                  </template>
 
              </Column>

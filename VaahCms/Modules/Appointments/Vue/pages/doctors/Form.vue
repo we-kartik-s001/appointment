@@ -182,14 +182,16 @@ const toggleFormMenu = (event) => {
 
                 <VhField label="Start Time">
                     <div class="p-inputgroup">
-                        <Calendar v-model="store.item.start_time" show-time/>
+                        <Calendar id="calendar-12h" v-model="store.item.start_time" showTime hourFormat="12" timeOnly/>
+<!--                        <Calendar v-model="store.item.start_time" show-time/>-->
                         <div class="required-field hidden"></div>
                     </div>
                 </VhField>
 
                 <VhField label="End Time">
                     <div class="p-inputgroup">
-                        <Calendar v-model="store.item.end_time" show-time/>
+                        <Calendar id="calendar-12h" v-model="store.item.end_time" showTime hourFormat="12" timeOnly showSeconds/>
+<!--                        <Calendar v-model="store.item.end_time" show-time/>-->
                         <div class="required-field hidden"></div>
                     </div>
                 </VhField>
