@@ -17,9 +17,9 @@ class ApPatients extends Migration
         if (!Schema::hasTable('ap_patients')) {
             Schema::create('ap_patients', function (Blueprint $table) {
                 $table->id()->index();
-                $table->string('name',20);
-                $table->string('email',50)->unique();
-                $table->unsignedBigInteger('phone');
+                $table->string('name',20)->nullable();
+                $table->string('email',50)->unique()->nullable();
+                $table->unsignedBigInteger('phone')->nullable();
                 $table->timestamps();
                 $table->softDeletes();
             });

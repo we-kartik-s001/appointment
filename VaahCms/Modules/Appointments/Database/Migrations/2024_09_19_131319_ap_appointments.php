@@ -17,10 +17,10 @@ class ApAppointments extends Migration
         if (!Schema::hasTable('ap_appointments')) {
             Schema::create('ap_appointments', function (Blueprint $table) {
                 $table->id()->index();
-                $table->unsignedTinyInteger('doctor_id');
-                $table->unsignedTinyInteger('patient_id');
-                $table->dateTime('date_time');
-                $table->tinyInteger('status')->default(1);
+                $table->unsignedTinyInteger('doctor_id')->nullable();
+                $table->unsignedTinyInteger('patient_id')->nullable();
+                $table->dateTime('date_time')->nullable();
+                $table->tinyInteger('status')->default(1)->nullable();
                 $table->string('reason')->nullable();
                 $table->timestamps();
                 $table->softDeletes();
