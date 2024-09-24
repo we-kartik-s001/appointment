@@ -21,7 +21,6 @@ class Appointment extends VaahModel
 {
 
     use SoftDeletes;
-//    use CrudWithUuidObservantTrait;
 
     //-------------------------------------------------
     protected $table = 'ap_appointments';
@@ -474,7 +473,7 @@ class Appointment extends VaahModel
     {
         $inputs = $request->all();
 
-        $checkStatus = self::checkAppointmentTime(Carbon::parse($inputs['date_time'])->timezone('Asia/Kolkata'),$inputs['doctor_id']);
+        $checkStatus = self::checkAppointmentTime(Carbon::parse($inputs['date_time'])->timezone('Asia/Kolkata'),$inputs['doctor_id'], $inputs['patient_id']);
         if(count($checkStatus) > 0){
             if(array_key_exists('message',$checkStatus)){
                 $response['errors'][] = $checkStatus['message'];
@@ -489,30 +488,6 @@ class Appointment extends VaahModel
         if (!$validation['success']) {
             return $validation;
         }
-
-//        // check if name exist
-//        $item = self::where('id', '!=', $id)
-//            ->withTrashed()
-//            ->where('name', $inputs['name'])->first();
-//
-//         if ($item) {
-//             $error_message = "This name is already exist".($item->deleted_at?' in trash.':'.');
-//             $response['success'] = false;
-//             $response['errors'][] = $error_message;
-//             return $response;
-//         }
-//
-//         // check if slug exist
-//         $item = self::where('id', '!=', $id)
-//             ->withTrashed()
-//             ->where('slug', $inputs['slug'])->first();
-//
-//         if ($item) {
-//             $error_message = "This slug is already exist".($item->deleted_at?' in trash.':'.');
-//             $response['success'] = false;
-//             $response['errors'][] = $error_message;
-//             return $response;
-//         }
 
         $item = self::where('id', $id)->withTrashed()->first();
         $item->fill($inputs);
@@ -676,7 +651,7 @@ class Appointment extends VaahModel
         return $this->belongsTo(Doctor::class);
     }
 
-    public static function checkAppointmentTime($dateTime,$doctorId)
+    public static function checkAppointmentTime($dateTime,$doctorId,$patientId = null)
     {
         //This code will help us to keep track that no appointment corresponding to a doctor should be created which falls within 15 min of other person's slot
         $dateTime = Carbon::parse(Carbon::createFromFormat('Y-m-d H:i:s',$dateTime));
@@ -689,6 +664,7 @@ class Appointment extends VaahModel
         }
 
         $appointments = Appointment::where('doctor_id',$doctorId)
+        ->where('patient_id','!=',$patientId)
         ->where(function ($query) use ($dateTime) {
             $query->whereBetween('date_time', [$dateTime->copy()->subMinutes(15), $dateTime->copy()->addMinutes(15)]);
         })->get();

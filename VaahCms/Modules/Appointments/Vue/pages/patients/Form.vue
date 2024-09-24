@@ -160,7 +160,8 @@ const toggleFormMenu = (event) => {
 
                 <VhField label="Phone">
                     <div class="p-inputgroup">
-                        <InputText class="w-full"
+                        <InputNumber class="w-full"
+                                    :useGrouping="false"
                                    placeholder="Enter the phone"
                                    name="patients-phone"
                                    data-testid="patients-phone"

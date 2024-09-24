@@ -17,7 +17,6 @@ class Doctor extends VaahModel
 {
 
     use SoftDeletes;
-//    use CrudWithUuidObservantTrait;
 
     //-------------------------------------------------
     protected $table = 'ap_doctors';
@@ -157,27 +156,6 @@ class Doctor extends VaahModel
         if (!$validation['success']) {
             return $validation;
         }
-
-
-//        // check if name exist
-//        $item = self::where('name', $inputs['name'])->withTrashed()->first();
-//
-//        if ($item) {
-//            $error_message = "This name is already exist".($item->deleted_at?' in trash.':'.');
-//            $response['success'] = false;
-//            $response['messages'][] = $error_message;
-//            return $response;
-//        }
-
-//        // check if slug exist
-//        $item = self::where('slug', $inputs['slug'])->withTrashed()->first();
-//
-//        if ($item) {
-//            $error_message = "This slug is already exist".($item->deleted_at?' in trash.':'.');
-//            $response['success'] = false;
-//            $response['messages'][] = $error_message;
-//            return $response;
-//        }
 
         $item = new self();
         $item->fill($inputs);
@@ -479,34 +457,10 @@ class Doctor extends VaahModel
     {
         $inputs = $request->all();
 
-        $validation = self::validation($inputs);
+        $validation = self::validation($inputs,$id);
         if (!$validation['success']) {
             return $validation;
         }
-
-//        // check if name exist
-//        $item = self::where('id', '!=', $id)
-//            ->withTrashed()
-//            ->where('name', $inputs['name'])->first();
-//
-//         if ($item) {
-//             $error_message = "This name is already exist".($item->deleted_at?' in trash.':'.');
-//             $response['success'] = false;
-//             $response['errors'][] = $error_message;
-//             return $response;
-//         }
-//
-//         // check if slug exist
-//         $item = self::where('id', '!=', $id)
-//             ->withTrashed()
-//             ->where('slug', $inputs['slug'])->first();
-//
-//         if ($item) {
-//             $error_message = "This slug is already exist".($item->deleted_at?' in trash.':'.');
-//             $response['success'] = false;
-//             $response['errors'][] = $error_message;
-//             return $response;
-//         }
 
         $patient_id = Appointment::where('doctor_id',$id)->pluck('patient_id');
         $patients = Patient::whereIn('id',$patient_id)->get();
@@ -514,7 +468,6 @@ class Doctor extends VaahModel
         foreach ($patients as $patient){
             $emails[] = $patient['email'];
         }
-//        dd($emails);
         $item = self::where('id', $id)->withTrashed()->first();
         $item->fill($inputs);
         $item->start_time = Carbon::parse($inputs['start_time'])->setTimeZone('Asia/Kolkata');
@@ -577,12 +530,12 @@ class Doctor extends VaahModel
     }
     //-------------------------------------------------
 
-    public static function validation($inputs)
+    public static function validation($inputs,$id=null)
     {
 
         $rules = array(
             'name' => 'required|string|max:20',
-            'email' => 'required|email|max:50',
+            'email' => 'required|email|max:50|unique:ap_doctors,email,'.$id,
             'phone' => 'required|integer|digits:10',
             'specialization' => 'required|string|max:50',
             'start_time' => 'required|date',

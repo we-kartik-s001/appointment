@@ -160,11 +160,12 @@ const toggleFormMenu = (event) => {
 
                 <VhField label="Phone Number">
                     <div class="p-inputgroup">
-                        <InputText class="w-full"
-                                   placeholder="Enter phone number"
-                                   name="doctors-phone"
-                                   data-testid="doctors-phone"
-                                   v-model="store.item.phone" required/>
+                        <InputNumber fluid
+                                     :useGrouping="false"
+                                     placeholder="Enter phone number"
+                                     name="doctors-phone"
+                                     data-testid="doctors-phone"
+                                     v-model="store.item.phone" required/>
                         <div class="required-field hidden"></div>
                     </div>
                 </VhField>
@@ -183,30 +184,16 @@ const toggleFormMenu = (event) => {
                 <VhField label="Start Time">
                     <div class="p-inputgroup">
                         <Calendar id="calendar-12h" v-model="store.item.start_time" showTime hourFormat="12" timeOnly/>
-<!--                        <Calendar v-model="store.item.start_time" show-time/>-->
                         <div class="required-field hidden"></div>
                     </div>
                 </VhField>
 
                 <VhField label="End Time">
                     <div class="p-inputgroup">
-                        <Calendar id="calendar-12h" v-model="store.item.end_time" showTime hourFormat="12" timeOnly showSeconds/>
-<!--                        <Calendar v-model="store.item.end_time" show-time/>-->
+                        <Calendar id="calendar-12h" v-model="store.item.end_time" showTime hourFormat="12" timeOnly/>
                         <div class="required-field hidden"></div>
                     </div>
                 </VhField>
-
-
-
-<!--                <VhField label="Is Active">-->
-<!--                    <InputSwitch v-bind:false-value="0"-->
-<!--                                 v-bind:true-value="1"-->
-<!--                                 class="p-inputswitch-sm"-->
-<!--                                 name="doctors-active"-->
-<!--                                 data-testid="doctors-active"-->
-<!--                                 v-model="store.item.is_active"/>-->
-<!--                </VhField>-->
-
             </div>
         </Panel>
 
