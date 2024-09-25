@@ -1,0 +1,14 @@
+[
+    {
+        "name": "Can Create Doctors",
+        "module": "appointments",
+        "section": "Doctors",
+        "details": "This will allow user to create doctors"
+    },
+    {
+        "name": "Can Create Patients",
+        "module": "appointments",
+        "section": "Patients",
+        "details": "This will allow user to create patients"
+    }
+]
