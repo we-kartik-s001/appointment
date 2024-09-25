@@ -1,0 +1,28 @@
+{
+    "name": "vaahcms/authentication",
+    "description": "This theme will integrate the authentication scaffolding",
+    "version": "0.0.1",
+    "authors": [
+        {
+            "name": "Kartik",
+            "email": "support@vaah.dev"
+        }
+    ],
+    "require": {
+        "php": "^7.0"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "VaahCms\\Themes\\Authentication\\Providers\\AuthenticationServiceProvider"
+            ],
+            "aliases": {
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "VaahCms\\Themes\\Authentication\\": ""
+        }
+    }
+}
