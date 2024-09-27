@@ -2,9 +2,11 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
 use VaahCms\Modules\Appointments\Models\Appointment;
 use VaahCms\Modules\Appointments\Models\Patient;
 use VaahCms\Modules\Appointments\Models\Doctor;
+use WebReinvent\VaahCms\Models\Permission;
 
 
 class AppointmentsController extends Controller
@@ -26,7 +28,7 @@ class AppointmentsController extends Controller
 
             $data = [];
 
-            $data['permission'] = [];
+            $data['permission'] = Auth::user()->permissions(true);
             $data['rows'] = config('vaahcms.per_page');
 
             $data['fillable']['columns'] = Appointment::getFillableColumns();

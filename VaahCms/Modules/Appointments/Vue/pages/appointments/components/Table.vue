@@ -97,17 +97,23 @@ const useVaah = vaah();
                 <template #body="prop">
                     <div class="p-inputgroup ">
 
-                        <Button class="p-button-tiny p-button-text"
+                        <p v-for="permission in store.assets.permission">
+                        <Button v-if=" permission == 'appointments-can-create-patients' "
+                                class="p-button-tiny p-button-text"
                                 data-testid="appointments-table-to-view"
                                 v-tooltip.top="'View'"
                                 @click="store.toView(prop.data)"
                                 icon="pi pi-eye" />
+                        </p>
 
-                        <Button class="p-button-tiny p-button-text"
+                        <p v-for="permission in store.assets.permission">
+                        <Button v-if=" permission == 'appointments-can-create-patients' "
+                                class="p-button-tiny p-button-text"
                                 data-testid="appointments-table-to-edit"
                                 v-tooltip.top="'Update'"
                                 @click="store.toEdit(prop.data)"
                                 icon="pi pi-pencil" />
+                        </p>
 
                         <Button class="p-button-tiny p-button-danger p-button-text"
                                 data-testid="appointments-table-action-trash"

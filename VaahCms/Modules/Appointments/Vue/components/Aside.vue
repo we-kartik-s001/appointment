@@ -1,9 +1,11 @@
 <script setup>
 import {reactive, ref} from 'vue';
+import {useAppointmentStore} from "../stores/store-appointments";
 
 import Menu from 'primevue/menu';
 import {useRoute} from 'vue-router';
 const route = useRoute();
+const store = useAppointmentStore();
 
 const inputs = {
 }
@@ -49,7 +51,6 @@ const items = ref([
 
 </script>
 <template>
-
     <div v-if="height">
       <Menu :model="items"  class="w-full"
             :pt="menu_pt">

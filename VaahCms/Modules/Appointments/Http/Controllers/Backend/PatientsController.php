@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
 use VaahCms\Modules\Appointments\Models\Patient;
 
 
@@ -53,6 +54,12 @@ class PatientsController extends Controller
     //----------------------------------------------------------
     public function getList(Request $request)
     {
+        if(!Auth::user()->hasPermission('appointments-can-create-patients'))
+        {
+            $response['errors'][] = 'Sorry, you are not allowed access to this page.';
+            return $response;
+        }
+
         try{
             return Patient::getList($request);
         }catch (\Exception $e){
