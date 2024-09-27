@@ -114,16 +114,6 @@ const useVaah = vaah();
                                 @click="store.itemAction('trash', prop.data)"
                                 v-tooltip.top="'Trash'"
                                 icon="pi pi-trash" />
-
-
-<!--                        <Button class="p-button-tiny p-button-success p-button-text"-->
-<!--                                data-testid="appointments-table-action-restore"-->
-<!--                                v-if="store.isViewLarge() && prop.data.deleted_at"-->
-<!--                                @click="store.itemAction('restore', prop.data)"-->
-<!--                                v-tooltip.top="'Restore'"-->
-<!--                                icon="pi pi-replay" />-->
-
-
                     </div>
 
                 </template>

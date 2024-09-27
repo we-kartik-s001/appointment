@@ -1,11 +1,11 @@
 <script setup>
 import {reactive, ref} from 'vue';
-import {useAppointmentStore} from "../stores/store-appointments";
+import {useRootStore} from "../stores/root";
 
 import Menu from 'primevue/menu';
 import {useRoute} from 'vue-router';
 const route = useRoute();
-const store = useAppointmentStore();
+const store = useRootStore();
 
 const inputs = {
 }
@@ -28,43 +28,42 @@ const items = ref([
             {
                 label: 'Dashboard',
                 icon: 'fa-regular fa-chart-bar',
-                route: "/"
+                route: "/",
+                permissions: [ "appointments-can-create-patients" , "appointments-can-create-doctors" ]
             },
             {
                 label: 'Doctors',
                 icon: 'fa-regular fa-chart-bar',
-                route: "/doctors"
+                route: "/doctors",
+                permissions: ["can-login-in-backend", "appointments-can-create-doctors" ]
             },
             {
                 label: 'Patients',
                 icon: 'fa-regular fa-chart-bar',
-                route: "/patients"
+                route: "/patients",
+                permissions: ["can-login-in-backend", "appointments-can-create-patients"]
             },
             {
                 label: 'Appointments',
                 icon: 'fa-regular fa-chart-bar',
-                route: "/appointments"
+                route: "/appointments",
+                permission: [ "can-login-in-backend", "appointments-can-create-patients" , "appointments-can-create-doctors" ]
             }
         ]
     },
 ]);
-
 </script>
 <template>
-    <div v-if="height">
+    <div v-if="height && store.assets">
       <Menu :model="items"  class="w-full"
             :pt="menu_pt">
         <template #item="{ item, props }">
-          <router-link v-if="item.route" v-slot="{ href, navigate }" :to="item.route" custom>
+          <router-link v-if="item.route && store.assets.permission.every(perm => item.permission.includes(perm))" v-slot="{ href, navigate }" :to="item.route" custom>
             <a v-ripple :href="href" v-bind="props.action" @click="navigate">
               <span :class="item.icon" />
               <span class="ml-2">{{ item.label }}</span>
             </a>
           </router-link>
-          <a v-else v-ripple :href="item.url" :target="item.target" v-bind="props.action">
-            <span :class="item.icon" />
-            <span class="ml-2">{{ item.label }}</span>
-          </a>
         </template>
       </Menu>
     </div>
