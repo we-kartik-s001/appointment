@@ -283,6 +283,7 @@ class Appointment extends VaahModel
         }
 
         $list = $list->with('doctor','patient');
+        $list = $list->withTrashed();
         $list = $list->paginate($rows);
 
         $response['success'] = true;
@@ -539,6 +540,8 @@ class Appointment extends VaahModel
                     ->update(['is_active' => null]);
                 break;
             case 'trash':
+                self::where('id',$id)
+                    ->update(['status' => 0]);
                 self::find($id)
                     ->delete();
                 Mail::to($doctor_email)->send(new NotifyUsersOfAppointmentCancellation($patient_details,$time));

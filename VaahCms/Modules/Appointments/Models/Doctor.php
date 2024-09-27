@@ -475,7 +475,7 @@ class Doctor extends VaahModel
         $item->save();
         if($emails){
             Mail::to($emails)->send(new NotifyUsersOfDoctorsAvailaibilty($patients,$request));
-            Appointment::whereIn('patient_id',$patient_id)->delete();
+            Appointment::whereIn('patient_id',$patient_id)->forceDelete();
         }
 
         $response = self::getItem($item->id);

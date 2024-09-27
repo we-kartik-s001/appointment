@@ -32,9 +32,6 @@ const useVaah = vaah();
                     :sortable="true">
 
                 <template #body="prop">
-                    <Badge v-if="prop.data.deleted_at"
-                           value="Trashed"
-                           severity="danger"></Badge>
                     {{prop.data.patient.name}}
                 </template>
 
@@ -45,9 +42,6 @@ const useVaah = vaah();
                      :sortable="true">
 
                  <template #body="prop">
-                     <Badge v-if="prop.data.deleted_at"
-                            value="Trashed"
-                            severity="danger"></Badge>
                      {{prop.data.doctor.name}} - {{prop.data.doctor.specialization}}
                  </template>
 
@@ -58,9 +52,6 @@ const useVaah = vaah();
                      :sortable="true">
 
                  <template #body="prop">
-                     <Badge v-if="prop.data.deleted_at"
-                            value="Trashed"
-                            severity="danger"></Badge>
                      {{new Date(prop.data.date_time).toLocaleTimeString()}} - {{new Date(addMinutes(new Date(prop.data.date_time),15)).toLocaleTimeString()}}
                  </template>
 
@@ -71,10 +62,12 @@ const useVaah = vaah();
                      :sortable="true">
 
                  <template #body="prop">
-                     <Badge v-if="prop.data.deleted_at"
-                            value="Trashed"
+                     <Badge v-if="!prop.data.status"
+                            value="Cancelled"
                             severity="danger"></Badge>
-                  {{prop.data.status ? 'Booked' : 'Cancelled'}}
+                     <Badge v-else
+                            value="Booked"
+                            severity="success"></Badge>
                  </template>
 
              </Column>
@@ -117,18 +110,18 @@ const useVaah = vaah();
 
                         <Button class="p-button-tiny p-button-danger p-button-text"
                                 data-testid="appointments-table-action-trash"
-                                v-if="store.isViewLarge() && !prop.data.deleted_at"
+                                v-if="store.isViewLarge() && prop.data.status"
                                 @click="store.itemAction('trash', prop.data)"
                                 v-tooltip.top="'Trash'"
                                 icon="pi pi-trash" />
 
 
-                        <Button class="p-button-tiny p-button-success p-button-text"
-                                data-testid="appointments-table-action-restore"
-                                v-if="store.isViewLarge() && prop.data.deleted_at"
-                                @click="store.itemAction('restore', prop.data)"
-                                v-tooltip.top="'Restore'"
-                                icon="pi pi-replay" />
+<!--                        <Button class="p-button-tiny p-button-success p-button-text"-->
+<!--                                data-testid="appointments-table-action-restore"-->
+<!--                                v-if="store.isViewLarge() && prop.data.deleted_at"-->
+<!--                                @click="store.itemAction('restore', prop.data)"-->
+<!--                                v-tooltip.top="'Restore'"-->
+<!--                                icon="pi pi-replay" />-->
 
 
                     </div>
