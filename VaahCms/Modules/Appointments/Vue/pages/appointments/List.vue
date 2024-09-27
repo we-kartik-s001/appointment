@@ -89,7 +89,9 @@ const toggleCreateMenu = (event) => {
 
                     <Button data-testid="appointments-list-create"
                             class="p-button-sm"
-                            @click="store.toForm()">
+                            @click="store.toForm()"
+                            v-if="store.assets.permission.includes('appointments-can-create-patients')"
+                    >
                         <i class="pi pi-plus mr-1"></i>
                         Create
                     </Button>
