@@ -220,13 +220,13 @@ class Appointment extends VaahModel
         }
         $is_active = $filter['is_active'];
 
-        if($is_active === 'true' || $is_active === true)
+        if((int)$is_active === 1 || $is_active === true)
         {
-            return $query->where('is_active', 1);
+            return $query->where('status', 1);
         } else{
             return $query->where(function ($q){
-                $q->whereNull('is_active')
-                    ->orWhere('is_active', 0);
+                $q->whereNull('status')
+                    ->orWhere('status', 0);
             });
         }
 

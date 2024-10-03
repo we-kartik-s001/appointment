@@ -41,7 +41,7 @@ const store = useAppointmentStore();
                 <template #label>
                     <b>Sort By:</b>
                 </template>
-                {{store.query.filter}}
+<!--                {{store.query.filter}}-->
                 <div class="field-radiobutton">
                     <RadioButton name="sort-none"
                                  inputId="sort-none"
@@ -54,17 +54,17 @@ const store = useAppointmentStore();
                     <RadioButton name="sort-ascending"
                                  inputId="sort-ascending"
                                  data-testid="appointments-filters-sort-ascending"
-                                 value="updated_at"
+                                 value="created_at"
                                  v-model="store.query.filter.sort" />
-                    <label for="sort-ascending" class="cursor-pointer">Updated (Ascending)</label>
+                    <label for="sort-ascending" class="cursor-pointer">Date of booking (Ascending)</label>
                 </div>
                 <div class="field-radiobutton">
                     <RadioButton name="sort-descending"
                                  inputId="sort-descending"
                                  data-testid="appointments-filters-sort-descending"
-                                 value="updated_at:desc"
+                                 value="created_at:desc"
                                  v-model="store.query.filter.sort" />
-                    <label for="sort-descending" class="cursor-pointer">Updated (Descending)</label>
+                    <label for="sort-descending" class="cursor-pointer">Date of booking (Descending)</label>
                 </div>
 
             </VhFieldVertical>
@@ -88,17 +88,17 @@ const store = useAppointmentStore();
                     <RadioButton name="active-true"
                                  inputId="active-true"
                                  data-testid="appointments-filters-active-true"
-                                 value="true"
+                                 value=1
                                  v-model="store.query.filter.is_active" />
-                    <label for="active-true" class="cursor-pointer">Only Active</label>
+                    <label for="active-true" class="cursor-pointer">Only Booked</label>
                 </div>
                 <div class="field-radiobutton">
                     <RadioButton name="active-false"
                                  inputId="active-false"
                                  data-testid="appointments-filters-active-false"
-                                 value="false"
+                                 value=0
                                  v-model="store.query.filter.is_active" />
-                    <label for="active-false" class="cursor-pointer">Only Inactive</label>
+                    <label for="active-false" class="cursor-pointer">Only Cancelled</label>
                 </div>
 
             </VhFieldVertical>
