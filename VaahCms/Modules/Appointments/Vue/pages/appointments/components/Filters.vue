@@ -41,7 +41,6 @@ const store = useAppointmentStore();
                 <template #label>
                     <b>Sort By:</b>
                 </template>
-<!--                {{store.query.filter}}-->
                 <div class="field-radiobutton">
                     <RadioButton name="sort-none"
                                  inputId="sort-none"
@@ -73,7 +72,7 @@ const store = useAppointmentStore();
 
             <VhFieldVertical >
                 <template #label>
-                    <b>Is Active:</b>
+                    <b>Booking Status:</b>
                 </template>
 
                 <div class="field-radiobutton">
@@ -107,7 +106,7 @@ const store = useAppointmentStore();
 
             <VhFieldVertical >
                 <template #label>
-                    <b>Trashed:</b>
+                    <b>Show Appointments:</b>
                 </template>
 
                 <div class="field-radiobutton">

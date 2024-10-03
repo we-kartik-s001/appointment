@@ -8,6 +8,15 @@ import VhViewRow from '../../vaahvue/vue-three/primeflex/VhViewRow.vue';
 const store = useAppointmentStore();
 const route = useRoute();
 
+const exclude_columns = ref([
+    'reason',
+    'deleted_at',
+    'updated_at',
+    'created_at',
+    'doctor_id',
+    'patient_id'
+]);
+
 onMounted(async () => {
 
     /**
@@ -145,7 +154,7 @@ const toggleItemMenu = (event) => {
                                        />
                         </template>
 
-                        <template v-else-if="column != 'reason' &&  column != 'deleted_at' &&  column != 'updated_at' &&  column != 'created_at'">
+                        <template v-else-if="!exclude_columns.includes(column)">
                             <VhViewRow :label="column"
                                        :value="value"
                             />
