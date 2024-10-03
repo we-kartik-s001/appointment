@@ -455,6 +455,7 @@ class Appointment extends VaahModel
     {
 
         $item = self::where('id', $id)
+            ->with('doctor','patient')
             ->withTrashed()
             ->first();
 

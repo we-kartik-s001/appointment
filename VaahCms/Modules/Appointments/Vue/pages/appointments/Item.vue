@@ -119,8 +119,8 @@ const toggleItemMenu = (event) => {
                 <div class="p-datatable p-component p-datatable-responsive-scroll p-datatable-striped p-datatable-sm">
                 <table class="p-datatable-table overflow-wrap-anywhere">
                     <tbody class="p-datatable-tbody">
+<!--                    {{store.item}}-->
                     <template v-for="(value, column) in store.item ">
-
                         <template v-if="column === 'created_by' || column === 'updated_by'
                         || column === 'deleted_by'">
                         </template>
@@ -132,25 +132,23 @@ const toggleItemMenu = (event) => {
                             />
                         </template>
 
-                        <template v-else-if="(column === 'created_by_user' || column === 'updated_by_user'
-                        || column === 'deleted_by_user') && (typeof value === 'object' && value !== null)">
-                            <VhViewRow :label="column"
-                                       :value="value"
-                                       type="user"
-                            />
-                        </template>
-
-                        <template v-else-if="column === 'is_active'">
-                            <VhViewRow :label="column"
+                        <template v-else-if="column === 'status'">
+                            <VhViewRow label="Appointment Status"
                                        :value="value"
                                        type="yes-no"
                             />
                         </template>
 
-                        <template v-else>
+                        <template v-else-if="column === 'doctor' || column === 'patient'">
+                            <VhViewRow :label="column"
+                                       :value="value.name"
+                                       />
+                        </template>
+
+                        <template v-else-if="column != 'reason' &&  column != 'deleted_at' &&  column != 'updated_at' &&  column != 'created_at'">
                             <VhViewRow :label="column"
                                        :value="value"
-                                       />
+                            />
                         </template>
 
 
