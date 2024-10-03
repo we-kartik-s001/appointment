@@ -151,7 +151,7 @@ class Appointment extends VaahModel
     public static function createItem($request)
     {
         $inputs = $request->all();
-        $check_status = self::checkAppointmentTime(Carbon::parse($inputs['date_time'])->timezone('Asia/Kolkata'),$inputs['doctor_id']);
+        $check_status = self::checkAppointmentTime(self::formatTimeZone($inputs['date_time']),$inputs['doctor_id']);
         if(count($check_status) > 0){
             if(array_key_exists('message',$check_status)){
                 $response['errors'][] = $check_status['message'];
@@ -476,7 +476,7 @@ class Appointment extends VaahModel
     {
         $inputs = $request->all();
 
-        $check_status = self::checkAppointmentTime(Carbon::parse($inputs['date_time'])->timezone('Asia/Kolkata'),$inputs['doctor_id'], $inputs['patient_id']);
+        $check_status = self::checkAppointmentTime(self::formatTimeZone($inputs['date_time']),$inputs['doctor_id'], $inputs['patient_id']);
         if(count($check_status) > 0){
             if(array_key_exists('message',$check_status)){
                 $response['errors'][] = $check_status['message'];
@@ -683,6 +683,10 @@ class Appointment extends VaahModel
             return $appointments->isEmpty(); // Returns true if no overlapping appointments
         }
         return $appointments->toArray();
+    }
+
+    public static function formatTimeZone($time){
+        return Carbon::parse($time)->timezone('Asia/Kolkata');
     }
 
 }

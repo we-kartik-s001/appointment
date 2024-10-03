@@ -159,8 +159,8 @@ class Doctor extends VaahModel
 
         $item = new self();
         $item->fill($inputs);
-        $item->start_time = Carbon::parse($inputs['start_time'])->setTimeZone('Asia/Kolkata');
-        $item->end_time = Carbon::parse($inputs['end_time'])->setTimeZone('Asia/Kolkata');
+        $item->start_time = Self::formatTimeZone($inputs['start_time']);
+        $item->end_time = Self::formatTimeZone($inputs['end_time']);
         $item->save();
 
         $response = self::getItem($item->id);
@@ -470,8 +470,8 @@ class Doctor extends VaahModel
         }
         $item = self::where('id', $id)->withTrashed()->first();
         $item->fill($inputs);
-        $item->start_time = Carbon::parse($inputs['start_time'])->setTimeZone('Asia/Kolkata');
-        $item->end_time = Carbon::parse($inputs['end_time'])->setTimeZone('Asia/Kolkata');
+        $item->start_time = Self::formatTimeZone($inputs['start_time']);
+        $item->end_time = Self::formatTimeZone($inputs['end_time']);
         $item->save();
         if($emails){
             Mail::to($emails)->send(new NotifyUsersOfDoctorsAvailaibilty($patients,$request));
@@ -621,5 +621,9 @@ class Doctor extends VaahModel
 
     public function appointments(){
         return $this->hasMany(Appointment::class,'doctor_id','id');
+    }
+
+    public static function formatTimeZone($time){
+        return Carbon::parse($time)->timezone('Asia/Kolkata');
     }
 }
