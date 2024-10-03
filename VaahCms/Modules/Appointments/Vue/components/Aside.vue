@@ -35,19 +35,19 @@ const items = ref([
                 label: 'Doctors',
                 icon: 'fa-regular fa-chart-bar',
                 route: "/doctors",
-                permissions: ["can-login-in-backend", "appointments-can-create-doctors" ]
+                permissions: ["appointments-can-create-doctors" ]
             },
             {
                 label: 'Patients',
                 icon: 'fa-regular fa-chart-bar',
                 route: "/patients",
-                permissions: ["can-login-in-backend", "appointments-can-create-patients"]
+                permissions: ["appointments-can-create-patients"]
             },
             {
                 label: 'Appointments',
                 icon: 'fa-regular fa-chart-bar',
                 route: "/appointments",
-                permissions: [ "can-login-in-backend", "appointments-can-create-patients" , "appointments-can-create-doctors" ]
+                permissions: ["appointments-can-create-patients" , "appointments-can-create-doctors" ]
             }
         ]
     },
@@ -58,7 +58,7 @@ const items = ref([
       <Menu :model="items"  class="w-full"
             :pt="menu_pt">
         <template #item="{ item, props }">
-          <router-link v-if="item.route && store.assets.permission.every(perm => item.permissions.includes(perm))" v-slot="{ href, navigate }" :to="item.route" custom>
+          <router-link v-if="item.route && item.permissions.some(perm => store.assets.permission.includes(perm))" v-slot="{ href, navigate }" :to="item.route" custom>
             <a v-ripple :href="href" v-bind="props.action" @click="navigate">
               <span :class="item.icon" />
               <span class="ml-2">{{ item.label }}</span>

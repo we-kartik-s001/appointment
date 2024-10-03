@@ -252,7 +252,7 @@ class Appointment extends VaahModel
     //-------------------------------------------------
     public function scopeSearchFilter($query, $filter)
     {
-
+//        dd($query);
         if(!isset($filter['q']))
         {
             return $query;
@@ -260,19 +260,25 @@ class Appointment extends VaahModel
         $search_array = explode(' ',$filter['q']);
         foreach ($search_array as $search_item){
             $query->where(function ($q1) use ($search_item) {
-                $q1->where('name', 'LIKE', '%' . $search_item . '%')
-                    ->orWhere('slug', 'LIKE', '%' . $search_item . '%')
-                    ->orWhere('id', 'LIKE', $search_item . '%');
+                $q1->whereHas('doctor', function ($query) use ($search_item) {
+                    $query->where('name', 'LIKE', '%' . $search_item . '%')
+                          ->orWhere('specialization', 'LIKE', '%' . $search_item . '%');
+                })
+                ->orWhereHas('patient', function ($query) use ($search_item) {
+                    $query->where('name', 'LIKE', '%' . $search_item . '%');
+                });
             });
         }
-
+//        dd($query->toSql());
     }
     //-------------------------------------------------
     public static function getList($request)
     {
+//        dd($request);
         $list = self::getSorted($request->filter);
         $list->isActiveFilter($request->filter);
         $list->trashedFilter($request->filter);
+        $list = $list->with('doctor','patient');
         $list->searchFilter($request->filter);
 
         $rows = config('vaahcms.per_page');
@@ -282,7 +288,6 @@ class Appointment extends VaahModel
             $rows = $request->rows;
         }
 
-        $list = $list->with('doctor','patient');
         $list = $list->withTrashed();
         $list = $list->paginate($rows);
 
@@ -669,7 +674,8 @@ class Appointment extends VaahModel
         $appointments = Appointment::where('doctor_id',$doctor_id)
         ->where('patient_id','!=',$patient_id)
         ->where(function ($query) use ($date_time) {
-            $query->whereBetween('date_time', [$date_time->copy()->subMinutes(15), $date_time->copy()->addMinutes(15)]);
+            $query->whereBetween('date_time', [$date_time->copy()
+                ->subMinutes(15), $date_time->copy()->addMinutes(15)]);
         })->get();
 
         if(!$appointments){
