@@ -2,14 +2,61 @@
 import { vaah } from '../../../vaahvue/pinia/vaah'
 import { useAppointmentStore } from '../../../stores/store-appointments'
 import {addMinutes} from 'date-fns';
+import { useToast } from "primevue/usetoast";
+import { useConfirm } from "primevue/useconfirm";
+
+const confirm = useConfirm();
+const toast = useToast();
 
 const store = useAppointmentStore();
 const useVaah = vaah();
+
+const deleteAppointment = (action,data) => {
+    confirm.require({
+        message: 'Are you sure you want to delete the appointment?',
+        header: 'Delete Appointment',
+        acceptProps: {
+            label: 'Save'
+        },
+        accept: () => {
+            toast.add({ severity: 'info', summary: 'Confirmed', detail: 'You have accepted', life: 3000 });
+            store.itemAction(action, data)
+        },
+        reject: () => {
+            return
+        }
+    });
+};
+
+const cancelAppointment = (action,data) => {
+    confirm.require({
+        message: 'Do you want to cancel this appointment?',
+        header: 'Appointment Cancellation',
+        rejectLabel: 'Cancel',
+        rejectProps: {
+            label: 'Cancel',
+            severity: 'secondary',
+            outlined: true
+        },
+        acceptProps: {
+            label: 'Delete',
+            severity: 'danger'
+        },
+        accept: () => {
+            toast.add({ severity: 'info', summary: 'Confirmed', detail: 'Record deleted', life: 3000 });
+            store.itemAction(action, data);
+        },
+        reject: () => {
+            // toast.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected', life: 3000 });
+        }
+    });
+};
 </script>
 
 <template>
     <div v-if="store.list">
         <!--table-->
+        <ConfirmDialog></ConfirmDialog>
          <DataTable :value="store.list.data"
                    dataKey="id"
                    :rowClass="store.setRowClass"
@@ -111,18 +158,19 @@ const useVaah = vaah();
                         <Button class="p-button-tiny p-button-danger p-button-text"
                                 data-testid="appointments-table-action-trash"
                                 v-if="store.isViewLarge()"
-                                @click="store.itemAction('trash', prop.data)"
+                                @click = "deleteAppointment('trash', prop.data)"
                                 v-tooltip.top="'Trash'"
                                 icon="pi pi-trash" />
-
+<!--                        @click="store.itemAction('trash', prop.data)"-->
                         <Button
                             v-if="prop.data.status"
                             class="p-button-danger p-button-text"
                             data-testid="appointments-table-to-cacnel"
-                            @click="store.itemAction('cancel', prop.data)"
+                            @click = "cancelAppointment('cancel', prop.data)"
                             v-tooltip.top="'Cancel Appointment'"
                             icon="pi pi-times" />
                     </div>
+<!--                    @click="store.itemAction('cancel', prop.data)"-->
 
                 </template>
 

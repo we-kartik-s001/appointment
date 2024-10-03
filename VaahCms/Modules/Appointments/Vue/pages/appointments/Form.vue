@@ -166,7 +166,7 @@ const toggleFormMenu = (event) => {
 
                 <VhField label="Select Time">
                     <div class="p-inputgroup">
-                    <Calendar id="calendar-12h" v-model="store.item.date_time" showTime hourFormat="12" timeOnly/>
+                    <Calendar id="calendar-12h" v-model="store.item.date_time" showTime hourFormat="12" timeOnly required/>
                         <div class="required-field hidden"></div>
                     </div>
                 </VhField>
