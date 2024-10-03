@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Faker\Factory;
+use VaahCms\Modules\Appointments\Mails\NotifyDoctorssOfAppointmentCancellationMail;
 use WebReinvent\VaahCms\Models\VaahModel;
 use WebReinvent\VaahCms\Traits\CrudWithUuidObservantTrait;
 use WebReinvent\VaahCms\Models\User;
@@ -557,7 +558,7 @@ class Appointment extends VaahModel
             case 'cancel':
                 self::where('id',$id)
                     ->update(['status' => 0]);
-                Mail::to($doctor_email)->send(new NotifyUsersOfAppointmentCancellation($patient_details,$time));
+                Mail::to($doctor_email)->send(new NotifyDoctorssOfAppointmentCancellationMail($patient_details,$time));
                 break;
         }
 
@@ -678,7 +679,8 @@ class Appointment extends VaahModel
         ->where('patient_id','!=',$patient_id)
         ->where(function ($query) use ($date_time) {
             $query->whereBetween('date_time', [$date_time->copy()
-                ->subMinutes(15), $date_time->copy()->addMinutes(15)]);
+                ->subMinutes(15), $date_time->copy()->addMinutes(15)])
+                ->where('status',1);
         })->get();
 
         if(!$appointments){
