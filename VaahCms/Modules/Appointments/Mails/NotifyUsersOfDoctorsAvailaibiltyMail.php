@@ -28,6 +28,7 @@ class NotifyUsersOfDoctorsAvailaibiltyMail extends Mailable {
     public function build()
     {
         return $this->view('appointments::emails.notifyusersofdoctorsavailaibilty')
+            ->subject('Dr. '. $this->doctor['name'].'\'s'. ' availaibility changed')
             -> with([
                 'patient' => $this->patients,
                 'doctor' => $this->doctor

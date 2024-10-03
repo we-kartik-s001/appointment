@@ -1,9 +1,6 @@
 <?php namespace VaahCms\Modules\Appointments\Models;
 
 use App\Mail\NotifyDoctorsOfCancelledAppointments;
-use App\Mail\NotifyDoctorsOfNewAppointments;
-use App\Mail\NotifyDoctorsOfUpdatedAppointment;
-use App\Mail\NotifyUsersOfAppointmentCancellation;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
@@ -12,7 +9,6 @@ use Illuminate\Support\Str;
 use Faker\Factory;
 use VaahCms\Modules\Appointments\Mails\NotifyDoctorssOfAppointmentCancellationMail;
 use WebReinvent\VaahCms\Models\VaahModel;
-use WebReinvent\VaahCms\Traits\CrudWithUuidObservantTrait;
 use WebReinvent\VaahCms\Models\User;
 use WebReinvent\VaahCms\Libraries\VaahSeeder;
 use Illuminate\Validation\Rule;

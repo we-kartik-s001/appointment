@@ -29,6 +29,7 @@ class NotifyDoctorsOfNewAppointmentsMail extends Mailable {
     public function build()
     {
         return $this->view('appointments::emails.notifydoctorsofnewappointments')
+            ->subject('New Appointment Scheduled by '.$this->patient_details['name'])
             ->with([
                 'patient' => $this->patient_details,
                 'time' => [

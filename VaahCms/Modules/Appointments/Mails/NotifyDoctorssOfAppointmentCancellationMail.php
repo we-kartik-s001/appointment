@@ -29,6 +29,7 @@ class NotifyDoctorssOfAppointmentCancellationMail extends Mailable {
     public function build()
     {
         return $this->view('appointments::emails.notifydoctorssofappointmentcancellation')
+            ->subject('Appointment Cancelled by '.$this->patient_details['name'])
             ->with([
                 'patient' => $this->patient_details,
                 'time' => Carbon::parse($this->time)->format('Y-m-d h:i:s A')

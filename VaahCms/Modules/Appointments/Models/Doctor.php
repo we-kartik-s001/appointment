@@ -1,6 +1,5 @@
 <?php namespace VaahCms\Modules\Appointments\Models;
 
-use App\Mail\NotifyUsersOfDoctorsAvailaibilty;
 use Carbon\Carbon;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -9,7 +8,6 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Faker\Factory;
 use WebReinvent\VaahCms\Models\VaahModel;
-use WebReinvent\VaahCms\Traits\CrudWithUuidObservantTrait;
 use WebReinvent\VaahCms\Models\User;
 use WebReinvent\VaahCms\Libraries\VaahSeeder;
 use VaahCms\Modules\Appointments\Mails\NotifyUsersOfDoctorsAvailaibiltyMail;
