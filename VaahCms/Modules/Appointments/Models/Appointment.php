@@ -17,6 +17,7 @@ use WebReinvent\VaahCms\Libraries\VaahSeeder;
 use Illuminate\Validation\Rule;
 use Carbon\Carbon;
 use VaahCms\Modules\Appointments\Mails\NotifyDoctorsOfNewAppointmentsMail;
+use VaahCms\Modules\Appointments\Mails\NotifyDoctorsOfUpdatedAppointmentsMail;
 
 class Appointment extends VaahModel
 {
@@ -500,7 +501,7 @@ class Appointment extends VaahModel
         $doctor_email = Doctor::where('id',$inputs['doctor_id'])->pluck('email');
         $patient_details = Patient::where('id',$inputs['patient_id'])->first();
         if($doctor_email){
-            Mail::to($doctor_email)->send(new NotifyDoctorsOfUpdatedAppointment($patient_details,Carbon::parse($inputs['date_time'])->setTimeZone('Asia/Kolkata')));
+            Mail::to($doctor_email)->send(new NotifyDoctorsOfUpdatedAppointmentsMail($patient_details,Carbon::parse($inputs['date_time'])->setTimeZone('Asia/Kolkata')));
         }
 
         $response = self::getItem($item->id);
