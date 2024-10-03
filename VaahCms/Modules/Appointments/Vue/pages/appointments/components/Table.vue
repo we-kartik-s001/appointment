@@ -19,11 +19,12 @@ const deleteAppointment = (action,data) => {
             label: 'Save'
         },
         accept: () => {
-            toast.add({ severity: 'info', summary: 'Confirmed', detail: 'You have accepted', life: 3000 });
-            store.itemAction(action, data)
+            if(store.itemAction(action, data)){
+                toast.add({ severity: 'info', summary: 'Confirmed', detail: 'Record deleted', life: 3000 });
+            }
         },
         reject: () => {
-            return
+           return
         }
     });
 };
@@ -43,11 +44,12 @@ const cancelAppointment = (action,data) => {
             severity: 'danger'
         },
         accept: () => {
-            toast.add({ severity: 'info', summary: 'Confirmed', detail: 'Record deleted', life: 3000 });
-            store.itemAction(action, data);
+            if(store.itemAction(action, data)){
+                toast.add({ severity: 'info', summary: 'Confirmed', detail: 'Appointment Cancelled Successfully', life: 3000 });
+            }
         },
         reject: () => {
-            // toast.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected', life: 3000 });
+            return
         }
     });
 };
@@ -56,7 +58,6 @@ const cancelAppointment = (action,data) => {
 <template>
     <div v-if="store.list">
         <!--table-->
-        <ConfirmDialog></ConfirmDialog>
          <DataTable :value="store.list.data"
                    dataKey="id"
                    :rowClass="store.setRowClass"
