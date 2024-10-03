@@ -144,6 +144,7 @@ const toggleFormMenu = (event) => {
                                   placeholder="Select Your Name"
                                   name="appointments-patient_id"
                                   data-testid="appointments-patient_id"
+                                  filter
                         />
                     </div>
                 </VhField>
@@ -158,6 +159,7 @@ const toggleFormMenu = (event) => {
                                   placeholder="Select Doctor"
                                   name="appointments-doctor_id"
                                   data-testid="appointments-doctor_id"
+                                  filter
                         />
                     </div>
                 </VhField>
