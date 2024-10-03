@@ -250,9 +250,8 @@ class Appointment extends VaahModel
 
     }
     //-------------------------------------------------
-    public function scopeSearchFilter($query, $filter)
+        public function scopeSearchFilter($query, $filter)
     {
-//        dd($query);
         if(!isset($filter['q']))
         {
             return $query;
@@ -269,7 +268,6 @@ class Appointment extends VaahModel
                 });
             });
         }
-//        dd($query->toSql());
     }
     //-------------------------------------------------
     public static function getList($request)
@@ -288,7 +286,7 @@ class Appointment extends VaahModel
             $rows = $request->rows;
         }
 
-        $list = $list->withTrashed();
+//        $list = $list->withTrashed();
         $list = $list->paginate($rows);
 
         $response['success'] = true;
@@ -545,16 +543,18 @@ class Appointment extends VaahModel
                     ->update(['is_active' => null]);
                 break;
             case 'trash':
-                self::where('id',$id)
-                    ->update(['status' => 0]);
                 self::find($id)
                     ->delete();
-                Mail::to($doctor_email)->send(new NotifyUsersOfAppointmentCancellation($patient_details,$time));
                 break;
             case 'restore':
                 self::where('id', $id)
                     ->onlyTrashed()
                     ->first()->restore();
+                break;
+            case 'cancel':
+                self::where('id',$id)
+                    ->update(['status' => 0]);
+                Mail::to($doctor_email)->send(new NotifyUsersOfAppointmentCancellation($patient_details,$time));
                 break;
         }
 

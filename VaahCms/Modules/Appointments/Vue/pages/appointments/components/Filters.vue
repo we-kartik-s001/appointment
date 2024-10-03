@@ -41,7 +41,7 @@ const store = useAppointmentStore();
                 <template #label>
                     <b>Sort By:</b>
                 </template>
-
+                {{store.query.filter}}
                 <div class="field-radiobutton">
                     <RadioButton name="sort-none"
                                  inputId="sort-none"

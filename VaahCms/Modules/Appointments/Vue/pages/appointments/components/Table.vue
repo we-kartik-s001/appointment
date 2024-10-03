@@ -108,9 +108,17 @@ const useVaah = vaah();
                                 icon="pi pi-pencil" />
                         </p>
 
+                        <Button
+                                v-if="prop.data.status"
+                                class="p-button-danger p-button-text"
+                                data-testid="appointments-table-to-cacnel"
+                                @click="store.itemAction('cancel', prop.data)"
+                                v-tooltip.top="'Cancel Appointment'"
+                                icon="pi pi-times" />
+
                         <Button class="p-button-tiny p-button-danger p-button-text"
                                 data-testid="appointments-table-action-trash"
-                                v-if="store.isViewLarge() && prop.data.status"
+                                v-if="store.isViewLarge()"
                                 @click="store.itemAction('trash', prop.data)"
                                 v-tooltip.top="'Trash'"
                                 icon="pi pi-trash" />
