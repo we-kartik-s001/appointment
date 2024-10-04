@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Faker\Factory;
 use VaahCms\Modules\Appointments\Mails\NotifyDoctorssOfAppointmentCancellationMail;
+use WebReinvent\VaahCms\Libraries\VaahMail;
 use WebReinvent\VaahCms\Models\VaahModel;
 use WebReinvent\VaahCms\Models\User;
 use WebReinvent\VaahCms\Libraries\VaahSeeder;
@@ -170,11 +171,11 @@ class Appointment extends VaahModel
         $item->status = 1; //keeping the status booked by default upon creation
         $item->fill($inputs);
         $item->date_time = Self::formatTimeZone($inputs['date_time']);
-        $item->save();
         $doctor_email = Doctor::where('id',$inputs['doctor_id'])->pluck('email');
         $patient_details = Patient::where('id',$inputs['patient_id'])->first();
         if($doctor_email){
-            Mail::to($doctor_email)->send(new NotifyDoctorsOfNewAppointmentsMail($patient_details,Self::formatTimeZone($inputs['date_time'])));
+            VaahMail::dispatch(new NotifyDoctorsOfNewAppointmentsMail($patient_details,Self::formatTimeZone($inputs['date_time'])),$doctor_email);
+            $item->save();
         }
 
         $response = self::getItem($item->id);
@@ -494,11 +495,11 @@ class Appointment extends VaahModel
         $item = self::where('id', $id)->withTrashed()->first();
         $item->fill($inputs);
         $item->date_time = Carbon::parse($inputs['date_time'])->setTimeZone('Asia/Kolkata');
-        $item->save();
         $doctor_email = Doctor::where('id',$inputs['doctor_id'])->pluck('email');
         $patient_details = Patient::where('id',$inputs['patient_id'])->first();
         if($doctor_email){
-            Mail::to($doctor_email)->send(new NotifyDoctorsOfUpdatedAppointmentsMail($patient_details,Carbon::parse($inputs['date_time'])->setTimeZone('Asia/Kolkata')));
+            Vaahmail::dispatch((new NotifyDoctorsOfUpdatedAppointmentsMail($patient_details,Carbon::parse($inputs['date_time'])->setTimeZone('Asia/Kolkata'))),$doctor_email);
+            $item->save();
         }
 
         $response = self::getItem($item->id);
@@ -554,7 +555,7 @@ class Appointment extends VaahModel
             case 'cancel':
                 self::where('id',$id)
                     ->update(['status' => 0]);
-                Mail::to($doctor_email)->send(new NotifyDoctorssOfAppointmentCancellationMail($patient_details,$time));
+                VaahMail::dispatch((new NotifyDoctorssOfAppointmentCancellationMail($patient_details,$time)),$doctor_email);
                 break;
         }
 

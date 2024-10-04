@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Faker\Factory;
+use WebReinvent\VaahCms\Libraries\VaahMail;
 use WebReinvent\VaahCms\Models\VaahModel;
 use WebReinvent\VaahCms\Models\User;
 use WebReinvent\VaahCms\Libraries\VaahSeeder;
@@ -473,7 +474,7 @@ class Doctor extends VaahModel
         $item->end_time = Self::formatTimeZone($inputs['end_time']);
         $item->save();
         if($emails){
-            Mail::to($emails)->send(new NotifyUsersOfDoctorsAvailaibiltyMail($patients,$request));
+            VaahMail::dispatch(new NotifyUsersOfDoctorsAvailaibiltyMail($patients,$request),$emails);
             Appointment::whereIn('patient_id',$patient_id)->forceDelete();
         }
 

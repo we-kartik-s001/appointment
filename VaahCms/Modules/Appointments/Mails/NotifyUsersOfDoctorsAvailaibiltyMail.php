@@ -1,5 +1,6 @@
 <?php  namespace VaahCms\Modules\Appointments\Mails;
 
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -31,7 +32,9 @@ class NotifyUsersOfDoctorsAvailaibiltyMail extends Mailable {
             ->subject('Dr. '. $this->doctor['name'].'\'s'. ' availaibility changed')
             -> with([
                 'patient' => $this->patients,
-                'doctor' => $this->doctor
+                'doctor' => $this->doctor['name'],
+                'start_time' => Carbon::parse($this->doctor['start_time'])->format('h:i:s A'),
+                'end_time' => Carbon::parse($this->doctor['end_time'])->format('h:i:s A'),
             ]);
     }
 
