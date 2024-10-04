@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Faker\Factory;
+use VaahCms\Modules\Appointments\Mails\NotifyUsersOfCancelledAppointmentsMail;
 use WebReinvent\VaahCms\Libraries\VaahMail;
 use WebReinvent\VaahCms\Models\VaahModel;
 use WebReinvent\VaahCms\Models\User;
@@ -367,9 +368,34 @@ class Doctor extends VaahModel
         }
 
         $items_id = collect($inputs['items'])->pluck('id')->toArray();
+        $recipients = Patient::whereIn('id', function($query) use ($items_id) {
+            $query->select('patient_id')
+                ->from('ap_appointments')
+                ->whereIn('doctor_id', $items_id);
+        })
+            ->with('appointments.doctor:id,name,email')
+            ->get()
+            ->map(function ($patient) {
+                return [
+                    'patient_email' => $patient->email,
+                    'doctor_name' => $patient->appointments->first()->doctor->name ?? null,
+//                    'doctor_email' => $patient->appointments->first()->doctor->email ?? null
+                ];
+            })
+            ->filter(function ($emails) {
+//                $emails['doctor_email'] !== null;
+                $emails['doctor_name'] !== null;
+                return $emails;
+            });
+//        dd($recipients);
+
         self::whereIn('id', $items_id)->forceDelete();
         Appointment::whereIn('doctor_id', $items_id)->forceDelete();
-
+        if(count($recipients) > 0){
+            foreach ($recipients as $recipient){
+                VaahMail::dispatch(new NotifyUsersOfCancelledAppointmentsMail($recipient['patient_email']),$recipient['patient_email']);
+            }
+        }
         $response['success'] = true;
         $response['data'] = true;
         $response['messages'][] = trans("vaahcms-general.action_successful");

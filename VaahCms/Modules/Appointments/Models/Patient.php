@@ -5,6 +5,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Faker\Factory;
+use VaahCms\Modules\Appointments\Mails\NotifyUsersOfCancelledAppointmentsMail;
+use WebReinvent\VaahCms\Libraries\VaahMail;
 use WebReinvent\VaahCms\Models\VaahModel;
 use WebReinvent\VaahCms\Models\User;
 use WebReinvent\VaahCms\Libraries\VaahSeeder;
@@ -360,7 +362,9 @@ class Patient extends VaahModel
         $items_id = collect($inputs['items'])->pluck('id')->toArray();
         self::whereIn('id', $items_id)->forceDelete();
         Appointment::whereIn('patient_id', $items_id)->forceDelete();
-
+//        $recipient_emails = Appointment::with('patient')->whereIn('doctor_id',$items_id)->get();
+//        dd($recipient_emails);
+//        VaahMail::dispatch(new NotifyUsersOfCancelledAppointmentsMail(),);
         $response['success'] = true;
         $response['data'] = true;
         $response['messages'][] = trans("vaahcms-general.action_successful");
