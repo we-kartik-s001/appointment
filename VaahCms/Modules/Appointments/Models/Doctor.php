@@ -1,20 +1,23 @@
 <?php namespace VaahCms\Modules\Appointments\Models;
 
+use Carbon\Carbon;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Faker\Factory;
+use VaahCms\Modules\Appointments\Mails\NotifyUsersOfCancelledAppointmentsMail;
+use WebReinvent\VaahCms\Libraries\VaahMail;
 use WebReinvent\VaahCms\Models\VaahModel;
-use WebReinvent\VaahCms\Traits\CrudWithUuidObservantTrait;
 use WebReinvent\VaahCms\Models\User;
 use WebReinvent\VaahCms\Libraries\VaahSeeder;
+use VaahCms\Modules\Appointments\Mails\NotifyUsersOfDoctorsAvailaibiltyMail;
 
 class Doctor extends VaahModel
 {
 
     use SoftDeletes;
-//    use CrudWithUuidObservantTrait;
 
     //-------------------------------------------------
     protected $table = 'ap_doctors';
@@ -155,29 +158,10 @@ class Doctor extends VaahModel
             return $validation;
         }
 
-
-//        // check if name exist
-//        $item = self::where('name', $inputs['name'])->withTrashed()->first();
-//
-//        if ($item) {
-//            $error_message = "This name is already exist".($item->deleted_at?' in trash.':'.');
-//            $response['success'] = false;
-//            $response['messages'][] = $error_message;
-//            return $response;
-//        }
-
-//        // check if slug exist
-//        $item = self::where('slug', $inputs['slug'])->withTrashed()->first();
-//
-//        if ($item) {
-//            $error_message = "This slug is already exist".($item->deleted_at?' in trash.':'.');
-//            $response['success'] = false;
-//            $response['messages'][] = $error_message;
-//            return $response;
-//        }
-
         $item = new self();
         $item->fill($inputs);
+        $item->start_time = Self::formatTimeZone($inputs['start_time']);
+        $item->end_time = Self::formatTimeZone($inputs['end_time']);
         $item->save();
 
         $response = self::getItem($item->id);
@@ -284,6 +268,7 @@ class Doctor extends VaahModel
             $rows = $request->rows;
         }
 
+        $list = $list->select(['id','name','email','phone','specialization','start_time','end_time']);
         $list = $list->paginate($rows);
 
         $response['success'] = true;
@@ -340,9 +325,13 @@ class Doctor extends VaahModel
             case 'trash':
                 self::whereIn('id', $items_id)
                     ->get()->each->delete();
+                Appointment::whereIn('doctor_id', $items_id)
+                    ->get()->each->delete();
                 break;
             case 'restore':
                 self::whereIn('id', $items_id)->onlyTrashed()
+                    ->get()->each->restore();
+                Appointment::whereIn('doctor_id', $items_id)->onlyTrashed()
                     ->get()->each->restore();
                 break;
         }
@@ -379,8 +368,34 @@ class Doctor extends VaahModel
         }
 
         $items_id = collect($inputs['items'])->pluck('id')->toArray();
-        self::whereIn('id', $items_id)->forceDelete();
+        $recipients = Patient::whereIn('id', function($query) use ($items_id) {
+            $query->select('patient_id')
+                ->from('ap_appointments')
+                ->whereIn('doctor_id', $items_id);
+        })
+            ->with('appointments.doctor:id,name,email')
+            ->get()
+            ->map(function ($patient) {
+                return [
+                    'patient_email' => $patient->email,
+                    'doctor_name' => $patient->appointments->first()->doctor->name ?? null,
+//                    'doctor_email' => $patient->appointments->first()->doctor->email ?? null
+                ];
+            })
+            ->filter(function ($emails) {
+//                $emails['doctor_email'] !== null;
+                $emails['doctor_name'] !== null;
+                return $emails;
+            });
+//        dd($recipients);
 
+        self::whereIn('id', $items_id)->forceDelete();
+        Appointment::whereIn('doctor_id', $items_id)->forceDelete();
+        if(count($recipients) > 0){
+            foreach ($recipients as $recipient){
+                VaahMail::dispatch(new NotifyUsersOfCancelledAppointmentsMail($recipient['patient_email']),$recipient['patient_email']);
+            }
+        }
         $response['success'] = true;
         $response['data'] = true;
         $response['messages'][] = trans("vaahcms-general.action_successful");
@@ -474,38 +489,26 @@ class Doctor extends VaahModel
     {
         $inputs = $request->all();
 
-        $validation = self::validation($inputs);
+        $validation = self::validation($inputs,$id);
         if (!$validation['success']) {
             return $validation;
         }
 
-//        // check if name exist
-//        $item = self::where('id', '!=', $id)
-//            ->withTrashed()
-//            ->where('name', $inputs['name'])->first();
-//
-//         if ($item) {
-//             $error_message = "This name is already exist".($item->deleted_at?' in trash.':'.');
-//             $response['success'] = false;
-//             $response['errors'][] = $error_message;
-//             return $response;
-//         }
-//
-//         // check if slug exist
-//         $item = self::where('id', '!=', $id)
-//             ->withTrashed()
-//             ->where('slug', $inputs['slug'])->first();
-//
-//         if ($item) {
-//             $error_message = "This slug is already exist".($item->deleted_at?' in trash.':'.');
-//             $response['success'] = false;
-//             $response['errors'][] = $error_message;
-//             return $response;
-//         }
-
+        $patient_id = Appointment::where('doctor_id',$id)->pluck('patient_id');
+        $patients = Patient::whereIn('id',$patient_id)->get();
+        $emails = [];
+        foreach ($patients as $patient){
+            $emails[] = $patient['email'];
+        }
         $item = self::where('id', $id)->withTrashed()->first();
         $item->fill($inputs);
+        $item->start_time = Self::formatTimeZone($inputs['start_time']);
+        $item->end_time = Self::formatTimeZone($inputs['end_time']);
         $item->save();
+        if($emails){
+            VaahMail::dispatch(new NotifyUsersOfDoctorsAvailaibiltyMail($patients,$request),$emails);
+            Appointment::whereIn('patient_id',$patient_id)->forceDelete();
+        }
 
         $response = self::getItem($item->id);
         $response['messages'][] = trans("vaahcms-general.saved_successfully");
@@ -559,12 +562,12 @@ class Doctor extends VaahModel
     }
     //-------------------------------------------------
 
-    public static function validation($inputs)
+    public static function validation($inputs,$id=null)
     {
 
         $rules = array(
             'name' => 'required|string|max:20',
-            'email' => 'required|email|max:50',
+            'email' => 'required|email|max:50|unique:ap_doctors,email,'.$id,
             'phone' => 'required|integer|digits:10',
             'specialization' => 'required|string|max:50',
             'start_time' => 'required|date',
@@ -648,5 +651,11 @@ class Doctor extends VaahModel
     //-------------------------------------------------
     //-------------------------------------------------
 
+    public function appointments(){
+        return $this->hasMany(Appointment::class,'doctor_id','id');
+    }
 
+    public static function formatTimeZone($time){
+        return Carbon::parse($time)->timezone('Asia/Kolkata');
+    }
 }

@@ -4,6 +4,8 @@ use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class BackendController extends Controller
 {
@@ -35,9 +37,9 @@ class BackendController extends Controller
         }
         */
 
-        
+
         return view('appointments::backend.pages.app');
-        
+
 
 
     }
@@ -66,6 +68,7 @@ class BackendController extends Controller
 
         $data=[];
 
+        $data['permission'] = Auth::user()->permissions(true);
         $data['module'] = [
             'name' => config('appointments.name'),
             'version' => config('settings.global.appointments_version')??config('appointments.version'),

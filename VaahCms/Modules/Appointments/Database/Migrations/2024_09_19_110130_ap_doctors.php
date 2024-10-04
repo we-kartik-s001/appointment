@@ -17,12 +17,12 @@ class ApDoctors extends Migration
         if (!Schema::hasTable('ap_doctors')) {
             Schema::create('ap_doctors', function (Blueprint $table) {
                 $table->id()->index();
-                $table->string('name',20);
-                $table->string('email',50)->unique();
-                $table->unsignedBigInteger('phone');
-                $table->string('specialization',50);
-                $table->timestamp('start_time');
-                $table->timestamp('end_time');
+                $table->string('name',20)->nullable();
+                $table->string('email',50)->unique()->nullable();
+                $table->unsignedBigInteger('phone')->nullable();
+                $table->string('specialization',50)->nullable();
+                $table->dateTime('start_time')->nullable();
+                $table->dateTime('end_time')->nullable();
                 $table->timestamps();
                 $table->softDeletes();
             });

@@ -1,0 +1,203 @@
+<script setup>
+import { vaah } from '../../../vaahvue/pinia/vaah'
+import { useAppointmentStore } from '../../../stores/store-appointments'
+import {addMinutes} from 'date-fns';
+import { useToast } from "primevue/usetoast";
+import { useConfirm } from "primevue/useconfirm";
+
+const confirm = useConfirm();
+const toast = useToast();
+
+const store = useAppointmentStore();
+const useVaah = vaah();
+
+const deleteAppointment = (action,data) => {
+    confirm.require({
+        message: 'Are you sure you want to delete the appointment?',
+        header: 'Delete Appointment',
+        acceptProps: {
+            label: 'Save'
+        },
+        accept: () => {
+            if(store.itemAction(action, data)){
+                toast.add({ severity: 'info', summary: 'Confirmed', detail: 'Record deleted', life: 3000 });
+            }
+        },
+        reject: () => {
+           return
+        }
+    });
+};
+
+const cancelAppointment = (action,data) => {
+    confirm.require({
+        message: 'Do you want to cancel this appointment?',
+        header: 'Appointment Cancellation',
+        rejectLabel: 'Cancel',
+        rejectProps: {
+            label: 'Cancel',
+            severity: 'secondary',
+            outlined: true
+        },
+        acceptProps: {
+            label: 'Delete',
+            severity: 'danger'
+        },
+        accept: () => {
+            if(store.itemAction(action, data)){
+                toast.add({ severity: 'info', summary: 'Confirmed', detail: 'Appointment Cancelled Successfully', life: 3000 });
+            }
+        },
+        reject: () => {
+            return
+        }
+    });
+};
+</script>
+
+<template>
+    <div v-if="store.list">
+        <!--table-->
+         <DataTable :value="store.list.data"
+                   dataKey="id"
+                   :rowClass="store.setRowClass"
+                   class="p-datatable-sm p-datatable-hoverable-rows"
+                   :nullSortOrder="-1"
+                   v-model:selection="store.action.items"
+                   stripedRows
+                   responsiveLayout="scroll">
+
+            <Column selectionMode="multiple"
+                    v-if="store.isViewLarge()"
+                    headerStyle="width: 3em">
+            </Column>
+
+            <Column field="id" header="ID" :style="{width: '80px'}" :sortable="true">
+            </Column>
+
+            <Column field="name" header="Name"
+                    class="overflow-wrap-anywhere"
+                    :sortable="true">
+
+                <template #body="prop">
+                    {{prop.data.patient.name}}
+                </template>
+
+            </Column>
+
+             <Column field="doctor" header="Doctor"
+                     class="overflow-wrap-anywhere"
+                     :sortable="true">
+
+                 <template #body="prop">
+                     {{prop.data.doctor.name}} - {{prop.data.doctor.specialization}}
+                 </template>
+
+             </Column>
+
+             <Column field="slot" header="Slot"
+                     class="overflow-wrap-anywhere"
+                     :sortable="true">
+
+                 <template #body="prop">
+                     {{new Date(prop.data.date_time).toLocaleTimeString()}} - {{new Date(addMinutes(new Date(prop.data.date_time),15)).toLocaleTimeString()}}
+                 </template>
+
+             </Column>
+
+             <Column field="status" header="Status"
+                     class="overflow-wrap-anywhere"
+                     :sortable="true">
+
+                 <template #body="prop">
+                     <Badge v-if="!prop.data.status"
+                            value="Cancelled"
+                            severity="danger"></Badge>
+                     <Badge v-else
+                            value="Booked"
+                            severity="success"></Badge>
+                 </template>
+
+             </Column>
+
+                <Column field="created_at" header="Created At"
+                        v-if="store.isViewLarge()"
+                        style="width:150px;"
+                        :sortable="true">
+
+                    <template #body="prop">
+                        {{useVaah.strToSlug(prop.data.created_at)}}
+                    </template>
+
+                </Column>
+
+            <Column field="actions" style="width:150px;"
+                    :style="{width: store.getActionWidth() }"
+                    :header="store.getActionLabel()">
+
+                <template #body="prop">
+                    <div class="p-inputgroup ">
+
+                        <p v-for="permission in store.assets.permission">
+                        <Button v-if=" permission == 'appointments-can-create-patients' "
+                                class="p-button-tiny p-button-text"
+                                data-testid="appointments-table-to-view"
+                                v-tooltip.top="'View'"
+                                @click="store.toView(prop.data)"
+                                icon="pi pi-eye" />
+                        </p>
+
+                        <p v-for="permission in store.assets.permission">
+                        <Button v-if=" permission == 'appointments-can-create-patients' "
+                                class="p-button-tiny p-button-text"
+                                data-testid="appointments-table-to-edit"
+                                v-tooltip.top="'Update'"
+                                @click="store.toEdit(prop.data)"
+                                icon="pi pi-pencil" />
+                        </p>
+
+                        <Button class="p-button-tiny p-button-danger p-button-text"
+                                data-testid="appointments-table-action-trash"
+                                v-if="store.isViewLarge()"
+                                @click = "deleteAppointment('trash', prop.data)"
+                                v-tooltip.top="'Trash'"
+                                icon="pi pi-trash" />
+<!--                        @click="store.itemAction('trash', prop.data)"-->
+                        <Button
+                            v-if="prop.data.status"
+                            class="p-button-danger p-button-text"
+                            data-testid="appointments-table-to-cacnel"
+                            @click = "cancelAppointment('cancel', prop.data)"
+                            v-tooltip.top="'Cancel Appointment'"
+                            icon="pi pi-times" />
+                    </div>
+<!--                    @click="store.itemAction('cancel', prop.data)"-->
+
+                </template>
+
+
+            </Column>
+
+             <template #empty>
+                 <div class="text-center py-3">
+                     No records found.
+                 </div>
+             </template>
+
+        </DataTable>
+        <!--/table-->
+
+        <!--paginator-->
+        <Paginator v-if="store.query.rows"
+                   v-model:rows="store.query.rows"
+                   :totalRecords="store.list.total"
+                   :first="((store.query.page??1)-1)*store.query.rows"
+                   @page="store.paginate($event)"
+                   :rowsPerPageOptions="store.rows_per_page"
+                   class="bg-white-alpha-0 pt-2">
+        </Paginator>
+        <!--/paginator-->
+
+    </div>
+
+</template>

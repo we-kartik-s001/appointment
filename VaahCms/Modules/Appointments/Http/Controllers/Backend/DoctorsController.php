@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use VaahCms\Modules\Appointments\Models\Doctor;
+use Illuminate\Support\Facades\Auth;
 
 
 class DoctorsController extends Controller
@@ -24,7 +25,7 @@ class DoctorsController extends Controller
 
             $data = [];
 
-            $data['permission'] = [];
+            $data['permission'] = Auth::user()->permissions(true);
             $data['rows'] = config('vaahcms.per_page');
 
             $data['fillable']['columns'] = Doctor::getFillableColumns();
@@ -53,6 +54,12 @@ class DoctorsController extends Controller
     //----------------------------------------------------------
     public function getList(Request $request)
     {
+        if(!Auth::user()->hasPermission('appointments-can-create-doctors'))
+        {
+              $response['errors'][] = 'Sorry, you are not allowed access to this page.';
+              return $response;
+        }
+
         try{
             return Doctor::getList($request);
         }catch (\Exception $e){
