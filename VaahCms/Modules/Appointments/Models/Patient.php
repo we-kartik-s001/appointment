@@ -258,6 +258,7 @@ class Patient extends VaahModel
             $rows = $request->rows;
         }
 
+        $list = $list->select(['id','name','email','phone']);
         $list = $list->paginate($rows);
 
         $response['success'] = true;
@@ -314,9 +315,13 @@ class Patient extends VaahModel
             case 'trash':
                 self::whereIn('id', $items_id)
                     ->get()->each->delete();
+                Appointment::whereIn('patient_id', $items_id)
+                    ->get()->each->delete();
                 break;
             case 'restore':
                 self::whereIn('id', $items_id)->onlyTrashed()
+                    ->get()->each->restore();
+                Appointment::whereIn('patient_id', $items_id)->onlyTrashed()
                     ->get()->each->restore();
                 break;
         }
@@ -354,6 +359,7 @@ class Patient extends VaahModel
 
         $items_id = collect($inputs['items'])->pluck('id')->toArray();
         self::whereIn('id', $items_id)->forceDelete();
+        Appointment::whereIn('patient_id', $items_id)->forceDelete();
 
         $response['success'] = true;
         $response['data'] = true;

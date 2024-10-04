@@ -16,6 +16,7 @@ use Illuminate\Validation\Rule;
 use Carbon\Carbon;
 use VaahCms\Modules\Appointments\Mails\NotifyDoctorsOfNewAppointmentsMail;
 use VaahCms\Modules\Appointments\Mails\NotifyDoctorsOfUpdatedAppointmentsMail;
+use function Doctrine\DBAL\Query\select;
 
 class Appointment extends VaahModel
 {
@@ -286,7 +287,7 @@ class Appointment extends VaahModel
             $rows = $request->rows;
         }
 
-//        $list = $list->withTrashed();
+        $list = $list->select(['id','doctor_id','patient_id','date_time','status','created_at']);
         $list = $list->paginate($rows);
 
         $response['success'] = true;
@@ -649,11 +650,13 @@ class Appointment extends VaahModel
     //-------------------------------------------------
 
     public function patient(){
-        return $this->belongsTo(Patient::class);
+        return $this->belongsTo(Patient::class)
+            ->select(['id','name','email','phone']);
     }
 
     public function doctor(){
-        return $this->belongsTo(Doctor::class);
+        return $this->belongsTo(Doctor::class)
+            ->select(['id','name','email','phone','specialization','start_time','end_time']);
     }
 
     public static function checkAppointmentTime($date_time,$doctor_id,$patient_id = null)
