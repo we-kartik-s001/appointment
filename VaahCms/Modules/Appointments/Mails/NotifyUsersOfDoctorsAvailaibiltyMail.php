@@ -35,6 +35,7 @@ class NotifyUsersOfDoctorsAvailaibiltyMail extends Mailable {
                 'doctor' => $this->doctor['name'],
                 'start_time' => Carbon::parse($this->doctor['start_time'])->format('h:i:s A'),
                 'end_time' => Carbon::parse($this->doctor['end_time'])->format('h:i:s A'),
+                'redirect_url' => vh_get_assets_base_url().'/backend/appointments#/appointments'
             ]);
     }
 

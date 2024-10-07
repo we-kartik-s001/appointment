@@ -273,7 +273,6 @@ class Appointment extends VaahModel
     //-------------------------------------------------
     public static function getList($request)
     {
-//        dd($request);
         $list = self::getSorted($request->filter);
         $list->isActiveFilter($request->filter);
         $list->trashedFilter($request->filter);
