@@ -147,7 +147,13 @@ const toggleItemMenu = (event) => {
                             />
                         </template>
 
-                        <template v-else>
+                        <template v-else-if="column === 'start_time' || column === 'end_time'">
+                            <VhViewRow :label="column"
+                                       :value="new Date(value).toLocaleTimeString()"
+                            />
+                        </template>
+
+                        <template v-else-if="column!= 'deleted_at'">
                             <VhViewRow :label="column"
                                        :value="value"
                                        />
