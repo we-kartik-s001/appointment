@@ -157,7 +157,7 @@ const toggleItemMenu = (event) => {
 
                         <template v-else-if="!exclude_columns.includes(column)">
                             <VhViewRow v-if="column === 'date_time'"
-                                       label="Start Time"
+                                       label="Time Slot"
                                        :value="new Date(value).toLocaleString() + '-' + new Date(addMinutes(new Date(value),15)).toLocaleTimeString()"
                             />
                             <VhViewRow v-else
