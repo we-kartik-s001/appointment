@@ -147,7 +147,7 @@ const toggleItemMenu = (event) => {
                             />
                         </template>
 
-                        <template v-else>
+                        <template v-else-if="column != 'deleted_at'">
                             <VhViewRow :label="column"
                                        :value="value"
                                        />

@@ -4,6 +4,8 @@ import {useRoute} from 'vue-router';
 
 import { useAppointmentStore } from '../../stores/store-appointments'
 
+import {addMinutes} from "date-fns/addMinutes";
+
 import VhViewRow from '../../vaahvue/vue-three/primeflex/VhViewRow.vue';
 const store = useAppointmentStore();
 const route = useRoute();
@@ -128,7 +130,6 @@ const toggleItemMenu = (event) => {
                 <div class="p-datatable p-component p-datatable-responsive-scroll p-datatable-striped p-datatable-sm">
                 <table class="p-datatable-table overflow-wrap-anywhere">
                     <tbody class="p-datatable-tbody">
-<!--                    {{store.item}}-->
                     <template v-for="(value, column) in store.item ">
                         <template v-if="column === 'created_by' || column === 'updated_by'
                         || column === 'deleted_by'">
@@ -155,7 +156,12 @@ const toggleItemMenu = (event) => {
                         </template>
 
                         <template v-else-if="!exclude_columns.includes(column)">
-                            <VhViewRow :label="column"
+                            <VhViewRow v-if="column === 'date_time'"
+                                       label="Time Slot"
+                                       :value="new Date(value).toLocaleString() + '-' + new Date(addMinutes(new Date(value),15)).toLocaleTimeString()"
+                            />
+                            <VhViewRow v-else
+                                       :label="column"
                                        :value="value"
                             />
                         </template>

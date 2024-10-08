@@ -134,7 +134,7 @@ const toggleFormMenu = (event) => {
 
                 </Message>
 
-                <VhField label="Name">
+                <VhField label="Patient">
                     <div class="p-inputgroup">
                         <Dropdown class="w-full"
                                   v-model= store.item.patient_id
