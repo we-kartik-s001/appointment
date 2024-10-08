@@ -194,6 +194,18 @@ const toggleFormMenu = (event) => {
                         <div class="required-field hidden"></div>
                     </div>
                 </VhField>
+
+                <VhField label="Price per slot">
+                    <div class="p-inputgroup">
+                        <InputNumber fluid
+                                     :useGrouping="false"
+                                     placeholder="Enter price"
+                                     name="doctors-price"
+                                     data-testid="doctors-price"
+                                     v-model="store.item.price" required/>
+                        <div class="required-field hidden"></div>
+                    </div>
+                </VhField>
             </div>
         </Panel>
 

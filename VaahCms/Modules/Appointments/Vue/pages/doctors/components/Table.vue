@@ -80,6 +80,19 @@ const useVaah = vaah();
 
              </Column>
 
+             <Column field="price" header="Price per slot"
+                     class="overflow-wrap-anywhere"
+                     :sortable="true">
+
+                 <template #body="prop">
+                     <Badge v-if="prop.data.deleted_at"
+                            value="Trashed"
+                            severity="danger"></Badge>
+                     {{prop.data.price ? '$'+prop.data.price : '-'}}
+                 </template>
+
+             </Column>
+
              <Column field="start_time" header="Start Time"
                      class="overflow-wrap-anywhere"
                      :sortable="true">
@@ -105,7 +118,7 @@ const useVaah = vaah();
                  </template>
 
              </Column>
-             
+
             <Column field="actions" style="width:150px;"
                     :style="{width: store.getActionWidth() }"
                     :header="store.getActionLabel()">

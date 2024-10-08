@@ -162,6 +162,7 @@ class Doctor extends VaahModel
         $item->fill($inputs);
         $item->start_time = Self::formatTimeZone($inputs['start_time']);
         $item->end_time = Self::formatTimeZone($inputs['end_time']);
+        $item->price = $inputs['price'];
         $item->save();
 
         $response = self::getItem($item->id);
@@ -268,7 +269,7 @@ class Doctor extends VaahModel
             $rows = $request->rows;
         }
 
-        $list = $list->select(['id','name','email','phone','specialization','start_time','end_time']);
+        $list = $list->select(['id','name','email','phone','specialization','start_time','end_time','price']);
         $list = $list->paginate($rows);
 
         $response['success'] = true;
@@ -567,6 +568,7 @@ class Doctor extends VaahModel
 
         $rules = array(
             'name' => 'required|string|max:20',
+            'price' => 'required|integer',
             'email' => 'required|email|max:50|unique:ap_doctors,email,'.$id,
             'phone' => 'required|integer|digits:10',
             'specialization' => 'required|string|max:50',
