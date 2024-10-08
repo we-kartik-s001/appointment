@@ -663,10 +663,10 @@ class Doctor extends VaahModel
                     case 'datetime':
                         $time = Carbon::now()->timezone('Asia/Kolkata');
                         if($field === 'start_time'){
-                            $inputs[$field] = Carbon::parse(Carbon::now()->minute(round($time->minute / 15) * 15)->second(0))->timezone('Asia/Kolkata')->format('h:i:s A');
+                            $inputs[$field] = Carbon::parse(Carbon::now()->minute(round($time->minute / 15) * 15)->second(0))->timezone('Asia/Kolkata')->format('Y-m-d h:i:s A');
                         }
                         else{
-                            $inputs[$field] = Carbon::parse(Carbon::now()->minute(round($time->minute / 15) * 15)->second(0)->addMinutes(30))->timezone('Asia/Kolkata')->format('h:i:s A');
+                            $inputs[$field] = Carbon::parse(Carbon::now()->minute(round($time->minute / 15) * 15)->second(0)->addMinutes(30))->timezone('Asia/Kolkata')->format('Y-m-d h:i:s A');
                         }
                         break;
                 }
