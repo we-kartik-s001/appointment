@@ -671,6 +671,8 @@ class Doctor extends VaahModel
                             $inputs[$field] = Carbon::parse(Carbon::now()->minute(round($time->minute / 15) * 15)->second(0)->addMinutes(30))->timezone('Asia/Kolkata')->format('Y-m-d h:i:s A');
                         }
                         break;
+                    case 'smallint':
+                        $inputs[$field] = rand(1,100);
                 }
             }
         }
