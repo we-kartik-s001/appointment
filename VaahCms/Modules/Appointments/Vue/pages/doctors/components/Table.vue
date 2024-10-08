@@ -10,6 +10,7 @@ const useVaah = vaah();
 <template>
 
     <div v-if="store.list">
+        {{store.query.filter}}
         <!--table-->
          <DataTable :value="store.list.data"
                    dataKey="id"

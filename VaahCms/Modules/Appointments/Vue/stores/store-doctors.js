@@ -52,6 +52,7 @@ export const useDoctorStore = defineStore({
         route_prefix: 'doctors.',
         view: 'large',
         show_filters: false,
+        show_field_filters: false,
         list_view_width: 12,
         form: {
             type: 'Create',
@@ -931,6 +932,10 @@ export const useDoctorStore = defineStore({
 
         },
         //---------------------------------------------------------------------
+        showFieldFilters(){
+            this.show_field_filters = !this.show_field_filters;
+            console.log(this.show_field_filters);
+        }
     }
 });
 
