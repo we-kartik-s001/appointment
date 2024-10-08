@@ -625,18 +625,53 @@ class Doctor extends VaahModel
             'model_namespace' => self::class,
             'except' => self::getUnFillableColumns()
         ]);
-        $fillable = VaahSeeder::fill($request);
-        if(!$fillable['success']){
-            return $fillable;
-        }
-        $inputs = $fillable['data']['fill'];
+//        $fillable = VaahSeeder::fill($request);
+//        if(!$fillable['success']){
+//            return $fillable;
+//        }
 
+        $model = $request->model_namespace;
+        $model = new $model();
+        $table = $model->getTable();
+//        $inputs = $fillable['data']['fill'];
+        $fields = self::getFillableColumns();
         $faker = Factory::create();
 
         /*
          * You can override the filled variables below this line.
          * You should also return relationship from here
          */
+        
+        foreach ($fields as $field){
+            $type = \DB::getSchemaBuilder()->getColumnType($table, $field);
+            switch ($type){
+                case 'text':
+                    $inputs[$field] = $faker->text(60);
+                    break;
+
+                case 'bigint':
+                    $inputs[$field] = random_int(1000000000, 9999999999);;
+                    break;
+
+                case 'varchar':
+                    if($field === 'name'){
+                        $inputs[$field] = $faker->text(10);
+                    }elseif ($field === 'specialization'){
+                        $inputs[$field] = 'Medicine';
+                    }
+                    break;
+
+                case 'datetime':
+                    $time = Carbon::now()->timezone('Asia/Kolkata');
+                    if($field === 'start_time'){
+                        $inputs[$field] = Carbon::parse(Carbon::now()->minute(round($time->minute / 15) * 15)->second(0))->timezone('Asia/Kolkata')->format('h:i:s A');
+                    }
+                    else{
+                        $inputs[$field] = Carbon::parse(Carbon::now()->minute(round($time->minute / 15) * 15)->second(0)->addMinutes(30))->timezone('Asia/Kolkata')->format('h:i:s A');
+                    }
+                    break;
+            }
+        }
 
         if(!$is_response_return){
             return $inputs;
