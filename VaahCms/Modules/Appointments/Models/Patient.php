@@ -1,5 +1,6 @@
 <?php namespace VaahCms\Modules\Appointments\Models;
 
+use Carbon\Carbon;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
@@ -579,18 +580,38 @@ class Patient extends VaahModel
             'model_namespace' => self::class,
             'except' => self::getUnFillableColumns()
         ]);
-        $fillable = VaahSeeder::fill($request);
-        if(!$fillable['success']){
-            return $fillable;
-        }
-        $inputs = $fillable['data']['fill'];
 
+        $model = $request->model_namespace;
+        $model = new $model();
+        $table = $model->getTable();
+        $fields = self::getFillableColumns();
         $faker = Factory::create();
 
         /*
          * You can override the filled variables below this line.
          * You should also return relationship from here
          */
+
+        if(count($fields) > 0){
+            foreach ($fields as $field){
+                $type = \DB::getSchemaBuilder()->getColumnType($table, $field);
+                switch ($type){
+                    case 'bigint':
+                        $inputs[$field] = random_int(1000000000, 9999999999);;
+                        break;
+
+                    case 'varchar':
+                        if($field === 'name'){
+                            $inputs[$field] = $faker->text(10);
+                        }elseif ($field === 'specialization'){
+                            $inputs[$field] = 'Medicine';
+                        }elseif($field === 'email'){
+                            $inputs[$field] = $faker->email(60);
+                        }
+                        break;
+                }
+            }
+        }
 
         if(!$is_response_return){
             return $inputs;

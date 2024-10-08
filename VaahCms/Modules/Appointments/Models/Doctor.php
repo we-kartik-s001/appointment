@@ -641,35 +641,35 @@ class Doctor extends VaahModel
          * You can override the filled variables below this line.
          * You should also return relationship from here
          */
-        
-        foreach ($fields as $field){
-            $type = \DB::getSchemaBuilder()->getColumnType($table, $field);
-            switch ($type){
-                case 'text':
-                    $inputs[$field] = $faker->text(60);
-                    break;
 
-                case 'bigint':
-                    $inputs[$field] = random_int(1000000000, 9999999999);;
-                    break;
+        if(count($fields) > 0){
+            foreach ($fields as $field){
+                $type = \DB::getSchemaBuilder()->getColumnType($table, $field);
+                switch ($type){
+                    case 'bigint':
+                        $inputs[$field] = random_int(1000000000, 9999999999);;
+                        break;
 
-                case 'varchar':
-                    if($field === 'name'){
-                        $inputs[$field] = $faker->text(10);
-                    }elseif ($field === 'specialization'){
-                        $inputs[$field] = 'Medicine';
-                    }
-                    break;
+                    case 'varchar':
+                        if($field === 'name'){
+                            $inputs[$field] = $faker->text(10);
+                        }elseif ($field === 'specialization'){
+                            $inputs[$field] = 'Medicine';
+                        }elseif($field === 'email'){
+                            $inputs[$field] = $faker->email(60);
+                        }
+                        break;
 
-                case 'datetime':
-                    $time = Carbon::now()->timezone('Asia/Kolkata');
-                    if($field === 'start_time'){
-                        $inputs[$field] = Carbon::parse(Carbon::now()->minute(round($time->minute / 15) * 15)->second(0))->timezone('Asia/Kolkata')->format('h:i:s A');
-                    }
-                    else{
-                        $inputs[$field] = Carbon::parse(Carbon::now()->minute(round($time->minute / 15) * 15)->second(0)->addMinutes(30))->timezone('Asia/Kolkata')->format('h:i:s A');
-                    }
-                    break;
+                    case 'datetime':
+                        $time = Carbon::now()->timezone('Asia/Kolkata');
+                        if($field === 'start_time'){
+                            $inputs[$field] = Carbon::parse(Carbon::now()->minute(round($time->minute / 15) * 15)->second(0))->timezone('Asia/Kolkata')->format('h:i:s A');
+                        }
+                        else{
+                            $inputs[$field] = Carbon::parse(Carbon::now()->minute(round($time->minute / 15) * 15)->second(0)->addMinutes(30))->timezone('Asia/Kolkata')->format('h:i:s A');
+                        }
+                        break;
+                }
             }
         }
 
