@@ -32,6 +32,7 @@ class Doctor extends VaahModel
         'id',
         'name',
         'email',
+        'price',
         'phone',
         'specialization',
         'start_time',
@@ -162,7 +163,6 @@ class Doctor extends VaahModel
         $item->fill($inputs);
         $item->start_time = Self::formatTimeZone($inputs['start_time']);
         $item->end_time = Self::formatTimeZone($inputs['end_time']);
-        $item->price = $inputs['price'];
         $item->save();
 
         $response = self::getItem($item->id);
