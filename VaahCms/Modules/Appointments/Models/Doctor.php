@@ -568,7 +568,7 @@ class Doctor extends VaahModel
 
         $rules = array(
             'name' => 'required|string|max:20',
-            'price' => 'required|integer',
+            'price' => 'required|integer|max:100',
             'email' => 'required|email|max:50|unique:ap_doctors,email,'.$id,
             'phone' => 'required|integer|digits:10',
             'specialization' => 'required|string|max:50',
@@ -696,5 +696,9 @@ class Doctor extends VaahModel
 
     public static function formatTimeZone($time){
         return Carbon::parse($time)->timezone('Asia/Kolkata');
+    }
+
+    public static function getSpecialization(){
+        return self::distinct()->pluck('specialization');
     }
 }

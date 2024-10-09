@@ -4,12 +4,17 @@ import { useDoctorStore } from '../../../stores/store-doctors'
 import VhFieldVertical from './../../../vaahvue/vue-three/primeflex/VhFieldVertical.vue'
 import { useToast } from "primevue/usetoast";
 import { useConfirm } from "primevue/useconfirm";
+import {onBeforeMount} from "vue";
 
 const confirm = useConfirm();
 const toast = useToast();
-
+const time_range = ['09:00-12:00','12:00-15:00','15:00-18:00','18:00-21:00'];
+const price_range = ['0-20','20-40','40-60','60-80','80-100'];
 const store = useDoctorStore();
 
+onBeforeMount(() => {
+    store.getSpecializationList();
+});
 </script>
 
 <template>
@@ -34,7 +39,7 @@ const store = useDoctorStore();
 
                     <Button data-testid="doctors-hide-filter"
                             class="p-button-sm"
-                            @click="store.show_filters = false">
+                            @click="store.show_field_filters = false">
                         <i class="pi pi-times"></i>
                     </Button>
 
@@ -44,66 +49,15 @@ const store = useDoctorStore();
 
             <VhFieldVertical >
                 <template #label>
-                    <b>Sort By:</b>
+                    <b>Specialization:</b>
                 </template>
 
-                <div class="field-radiobutton">
-                    <RadioButton name="sort-none"
-                                 inputId="sort-none"
-                                 data-testid="doctors-filters-sort-none"
-                                 value=""
-                                 v-model="store.query.filter.sort" />
-                    <label for="sort-none" class="cursor-pointer">None</label>
-                </div>
-                <div class="field-radiobutton">
-                    <RadioButton name="sort-ascending"
-                                 inputId="sort-ascending"
-                                 data-testid="doctors-filters-sort-ascending"
-                                 value="updated_at"
-                                 v-model="store.query.filter.sort" />
-                    <label for="sort-ascending" class="cursor-pointer">Updated (Ascending)</label>
-                </div>
-                <div class="field-radiobutton">
-                    <RadioButton name="sort-descending"
-                                 inputId="sort-descending"
-                                 data-testid="doctors-filters-sort-descending"
-                                 value="updated_at:desc"
-                                 v-model="store.query.filter.sort" />
-                    <label for="sort-descending" class="cursor-pointer">Updated (Descending)</label>
-                </div>
-
-            </VhFieldVertical>
-
-            <Divider/>
-
-            <VhFieldVertical >
-                <template #label>
-                    <b>Is Active:</b>
-                </template>
-
-                <div class="field-radiobutton">
+                <div v-for="(specialization,index) in store.specializations" :key="index" class="field-radiobutton">
                     <RadioButton name="active-all"
-                                 inputId="active-all"
-                                 value="null"
-                                 data-testid="doctors-filters-active-all"
-                                 v-model="store.query.filter.is_active" />
-                    <label for="active-all" class="cursor-pointer">All</label>
-                </div>
-                <div class="field-radiobutton">
-                    <RadioButton name="active-true"
-                                 inputId="active-true"
-                                 data-testid="doctors-filters-active-true"
-                                 value="true"
-                                 v-model="store.query.filter.is_active" />
-                    <label for="active-true" class="cursor-pointer">Only Active</label>
-                </div>
-                <div class="field-radiobutton">
-                    <RadioButton name="active-false"
-                                 inputId="active-false"
-                                 data-testid="doctors-filters-active-false"
-                                 value="false"
-                                 v-model="store.query.filter.is_active" />
-                    <label for="active-false" class="cursor-pointer">Only Inactive</label>
+                                 :inputId="specialization"
+                                 :value="specialization"
+                                 v-model="store.query.field_filter.specialization" />
+                    <label for="active-all" class="cursor-pointer">{{specialization}}</label>
                 </div>
 
             </VhFieldVertical>
@@ -112,32 +66,33 @@ const store = useDoctorStore();
 
             <VhFieldVertical >
                 <template #label>
-                    <b>Trashed:</b>
+                    <b>Price:</b>
                 </template>
 
-                <div class="field-radiobutton">
-                    <RadioButton name="trashed-exclude"
-                                 inputId="trashed-exclude"
-                                 data-testid="doctors-filters-trashed-exclude"
-                                 value=""
-                                 v-model="store.query.filter.trashed" />
-                    <label for="trashed-exclude" class="cursor-pointer">Exclude Trashed</label>
+                <div v-for="(price,index) in price_range" :key="index" class="field-radiobutton">
+                    <RadioButton name="active-all"
+                                 :inputId="price"
+                                 :value="price"
+                                 data-testid="doctors-filters-active-all"
+                                 v-model="store.query.field_filter.price" />
+                    <label for="active-all" class="cursor-pointer">{{price}}</label>
                 </div>
-                <div class="field-radiobutton">
-                    <RadioButton name="trashed-include"
-                                 inputId="trashed-include"
-                                 data-testid="doctors-filters-trashed-include"
-                                 value="include"
-                                 v-model="store.query.filter.trashed" />
-                    <label for="trashed-include" class="cursor-pointer">Include Trashed</label>
-                </div>
-                <div class="field-radiobutton">
-                    <RadioButton name="trashed-only"
-                                 inputId="trashed-only"
-                                 data-testid="doctors-filters-trashed-only"
-                                 value="only"
-                                 v-model="store.query.filter.trashed" />
-                    <label for="trashed-only" class="cursor-pointer">Only Trashed</label>
+            </VhFieldVertical>
+
+            <Divider/>
+
+            <VhFieldVertical >
+                <template #label>
+                    <b>Timings:</b>
+                </template>
+
+                <div v-for="(timing,index) in time_range" :key="index" class="field-radiobutton">
+                    <RadioButton name="active-all"
+                                 :inputId="timing"
+                                 :value="timing"
+                                 data-testid="doctors-filters-active-all"
+                                 v-model="store.query.field_filter.timings" />
+                    <label for="active-all" class="cursor-pointer">{{timing}}</label>
                 </div>
 
             </VhFieldVertical>
