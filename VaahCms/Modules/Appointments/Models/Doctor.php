@@ -277,7 +277,6 @@ class Doctor extends VaahModel
         foreach ($search_array as $search_item){
             $query->where(function ($q1) use ($search_item) {
                 $q1->where('name', 'LIKE', '%' . $search_item . '%')
-                    ->orWhere('slug', 'LIKE', '%' . $search_item . '%')
                     ->orWhere('id', 'LIKE', $search_item . '%');
             });
         }
@@ -286,7 +285,6 @@ class Doctor extends VaahModel
     //-------------------------------------------------
     public static function getList($request)
     {
-//        dd($request->field_filter);
         $list = self::getSorted($request->filter);
         $list->isActiveFilter($request->filter);
         $list->trashedFilter($request->filter);
