@@ -152,7 +152,6 @@ export const useDoctorStore = defineStore({
                     }
 
                     this.route = newVal;
-
                     if(newVal.params.id){
                         this.getItem(newVal.params.id);
                     }
@@ -166,6 +165,12 @@ export const useDoctorStore = defineStore({
         watchStates()
         {
             watch(this.query.filter, (newVal,oldVal) =>
+                {
+                    this.delayedSearch();
+                },{deep: true}
+            )
+
+            watch(this.query.field_filter, (newVal,oldVal) =>
                 {
                     this.delayedSearch();
                 },{deep: true}
@@ -618,6 +623,11 @@ export const useDoctorStore = defineStore({
             for(let key in this.query.filter)
             {
                 this.query.filter[key] = null;
+            }
+
+            for(let key in this.query.field_filter)
+            {
+                this.query.field_filter[key] = null;
             }
             await this.updateUrlQueryString(this.query);
         },

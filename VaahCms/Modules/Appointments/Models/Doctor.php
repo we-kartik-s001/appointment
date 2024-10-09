@@ -221,23 +221,29 @@ class Doctor extends VaahModel
 
     public function scopeIsFieldFilter($query, $field_filter){
         $filter_type = array_keys($field_filter);
-        $filter_value = $field_filter[$filter_type[0]];
-//        dd('filter applied',$keys[0]);
         if(count($field_filter) <= 0)
         {
             return $query;
         }
-        switch ($filter_type[0]){
-            case 'specialization' :
-                $query->where('specialization',$filter_value);
-                break;
-            case 'price' :
-                $parts = explode('-', $filter_value);
-                $minPrice = $parts[0];
-                $maxPrice = $parts[1];
-                $query->whereBetween('price',[$minPrice,$maxPrice]);
-//                dd((float)$firstNumber,(float)$secondNumber);
-            break;
+        foreach($filter_type as $filter){
+            $filter_value = $field_filter[$filter];
+            switch ($filter){
+                case 'specialization' :
+                    $query->where('specialization',$filter_value);
+                    break;
+                case 'price' :
+                    $parts = explode('-', $filter_value);
+                    $minPrice = floatval(preg_replace('/[^0-9.]/', '', $parts[0]));
+                    $maxPrice = floatval(preg_replace('/[^0-9.]/', '', $parts[1]));
+                    $query->whereBetween('price',[$minPrice,$maxPrice]);
+                    break;
+                case 'timings' :
+                    $parts = explode('-', $filter_value);
+                    $minTime = Carbon::parse($parts[0])->format('H:i');
+                    $maxTime = Carbon::parse($parts[1])->format('H:i');
+                    $query->whereRaw('TIME(start_time) BETWEEN ? AND ?', [$minTime,$maxTime]);
+                    break;
+            }
         }
         return $query;
     }

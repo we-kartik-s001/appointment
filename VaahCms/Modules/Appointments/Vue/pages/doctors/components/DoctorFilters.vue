@@ -8,8 +8,30 @@ import {onBeforeMount} from "vue";
 
 const confirm = useConfirm();
 const toast = useToast();
-const time_range = ['09:00-12:00','12:00-15:00','15:00-18:00','18:00-21:00'];
-const price_range = ['0-20','20-40','40-60','60-80','80-100'];
+const currency_sign = '$';
+
+//define your time intervals here in order to update the range list
+const time_range = [
+    '09:00 AM-12:00 PM',
+    '12:00 PM-03:00 PM',
+    '03:00 PM-06:00 PM',
+    '06:00 PM-09:00 PM',
+    '09:00 PM-12:00 AM'
+];
+
+//define your price intervals here in order to update the range list
+const price_range = [
+    '0-20',
+    '20-40',
+    '40-60',
+    '60-80',
+    '80-100'
+];
+
+const price_range_with_currency = price_range.map(range => {
+    const [min, max] = range.split('-');
+    return `${currency_sign.concat(min)}-${currency_sign.concat(max)}`;
+});
 const store = useDoctorStore();
 
 onBeforeMount(() => {
@@ -69,7 +91,7 @@ onBeforeMount(() => {
                     <b>Price:</b>
                 </template>
 
-                <div v-for="(price,index) in price_range" :key="index" class="field-radiobutton">
+                <div v-for="(price,index) in price_range_with_currency" :key="index" class="field-radiobutton">
                     <RadioButton name="active-all"
                                  :inputId="price"
                                  :value="price"
