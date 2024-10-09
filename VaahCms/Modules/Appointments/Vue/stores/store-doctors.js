@@ -66,6 +66,7 @@ export const useDoctorStore = defineStore({
         },
         is_list_loading: null,
         count_filters: 0,
+        count_field_filters: 0,
         list_selected_menu: [],
         list_bulk_menu: [],
         list_create_menu: [],
@@ -595,10 +596,16 @@ export const useDoctorStore = defineStore({
         countFilters: function (query)
         {
             this.count_filters = 0;
-            if(query && query.filter)
+            this.count_field_filters = 0;
+            if(query)
             {
-                let filter = vaah().cleanObject(query.filter);
-                this.count_filters = Object.keys(filter).length;
+                if(query.filter){
+                    let filter = vaah().cleanObject(query.filter);
+                    this.count_filters = Object.keys(filter).length;
+                }
+                else if(query.field_filter){
+                   this.count_field_filters = Object.keys(query.field_filter).length;
+                }
             }
         },
         //---------------------------------------------------------------------
