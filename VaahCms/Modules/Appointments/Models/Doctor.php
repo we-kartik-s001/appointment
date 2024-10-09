@@ -197,7 +197,6 @@ class Doctor extends VaahModel
     //-------------------------------------------------
     public function scopeIsActiveFilter($query, $filter)
     {
-
         if(!isset($filter['is_active'])
             || is_null($filter['is_active'])
             || $filter['is_active'] === 'null'
@@ -219,6 +218,30 @@ class Doctor extends VaahModel
 
     }
     //-------------------------------------------------
+
+    public function scopeIsFieldFilter($query, $field_filter){
+        $filter_type = array_keys($field_filter);
+        $filter_value = $field_filter[$filter_type[0]];
+//        dd('filter applied',$keys[0]);
+        if(count($field_filter) <= 0)
+        {
+            return $query;
+        }
+        switch ($filter_type[0]){
+            case 'specialization' :
+                $query->where('specialization',$filter_value);
+                break;
+            case 'price' :
+                $parts = explode('-', $filter_value);
+                $minPrice = $parts[0];
+                $maxPrice = $parts[1];
+                $query->whereBetween('price',[$minPrice,$maxPrice]);
+//                dd((float)$firstNumber,(float)$secondNumber);
+            break;
+        }
+        return $query;
+    }
+
     public function scopeTrashedFilter($query, $filter)
     {
 
@@ -257,10 +280,14 @@ class Doctor extends VaahModel
     //-------------------------------------------------
     public static function getList($request)
     {
+//        dd($request->field_filter);
         $list = self::getSorted($request->filter);
         $list->isActiveFilter($request->filter);
         $list->trashedFilter($request->filter);
         $list->searchFilter($request->filter);
+        if($request->has('field_filter')){
+            $list->isFieldFilter($request->field_filter);
+        }
 
         $rows = config('vaahcms.per_page');
 
