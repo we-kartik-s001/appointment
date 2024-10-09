@@ -6,6 +6,9 @@ use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use VaahCms\Modules\Appointments\Models\Appointment;
+use VaahCms\Modules\Appointments\Models\Doctor;
+use VaahCms\Modules\Appointments\Models\Patient;
 
 class BackendController extends Controller
 {
@@ -107,7 +110,7 @@ class BackendController extends Controller
 
         $data['timezone'] = env("APP_TIMEZONE");
         $data['server_date_time'] = \Carbon::now();
-
+        $data['empty_item']['appointments']=Doctor::with('appointments')->get();
         $response['success'] = true;
         $response['data'] = $data;
 
