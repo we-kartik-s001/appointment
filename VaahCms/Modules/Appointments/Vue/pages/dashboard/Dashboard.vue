@@ -15,7 +15,7 @@ const store = useRootStore();
                    v-model="store.assets.empty_item.appointments"
         >
 
-            <Column field="name" header="Name"
+            <Column field="name" header="Doctor's Name"
                     class="overflow-wrap-anywhere"
                     :sortable="true">
 
@@ -89,7 +89,13 @@ const store = useRootStore();
                     <Badge v-if="prop.data.deleted_at"
                            value="Trashed"
                            severity="danger"></Badge>
-                {{prop.data.appointments.length > 0 ? prop.data.appointments.length : `No upcoming appointment`}}
+                <Button v-if="prop.data.appointments.length > 0"
+                        severity="help"
+                        v-tooltip.right="'Click to view the scheduled appointments'"
+                >
+                    {{prop.data.appointments.length}}
+                </Button>
+                <p v-else style="color: red;">No Upcoming Appointment</p>
                 </template>
 
             </Column>
@@ -103,7 +109,7 @@ const store = useRootStore();
                     <Badge v-if="prop.data.deleted_at"
                            value="Trashed"
                            severity="danger"></Badge>
-                    {{prop.data.appointments.length > 0 ? prop.data.appointments.length*prop.data.price : `-`}}
+                    {{prop.data.appointments.length > 0 ? `$${prop.data.appointments.length*prop.data.price}` : `-`}}
                 </template>
 
             </Column>
