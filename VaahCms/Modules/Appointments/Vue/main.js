@@ -36,7 +36,7 @@ import Calendar from "primevue/calendar";
 import Dropdown from "primevue/dropdown";
 import InputNumber from "primevue/inputnumber";
 import Dialog from "primevue/dialog";
-
+import Sidebar from "primevue/sidebar";
 //-------------/CRUD PrimeVue Imports
 
 
@@ -93,6 +93,7 @@ app.component('Calendar',Calendar);
 app.component('Dropdown',Dropdown);
 app.component('InputNumber',InputNumber);
 app.component('Dialog',Dialog);
+app.component('Sidebar',Sidebar)
 //-------------/CRUD PrimeVue Use
 
 

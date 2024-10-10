@@ -300,7 +300,8 @@ class Doctor extends VaahModel
             $rows = $request->rows;
         }
 
-        $list = $list->select(['id','name','email','phone','specialization','start_time','end_time','price']);
+        $list = $list->select(['id','name','email','phone','specialization','start_time','end_time','price'])
+                     ->with('appointments.patient');
         $list = $list->paginate($rows);
 
         $response['success'] = true;

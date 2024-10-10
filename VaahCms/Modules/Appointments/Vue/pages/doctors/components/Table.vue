@@ -1,10 +1,32 @@
 <script setup>
 import { vaah } from '../../../vaahvue/pinia/vaah'
 import { useDoctorStore } from '../../../stores/store-doctors'
+import {reactive} from 'vue';
 
 const store = useDoctorStore();
 const useVaah = vaah();
 
+const state = reactive({
+    visible: false,
+    appointment_data: null,
+});
+
+const showAppointmentDetails = (id) => {
+    state.visible = !state.visible;
+    if (state.visible) {
+        if(store.list.data){
+            const foundDoctor = store.list.data.find(ele => ele.id === id);
+            if (foundDoctor) {
+                state.appointment_data = foundDoctor.appointments || [];
+            } else {
+                state.appointment_data = [];
+            }
+        }
+        else {
+            state.appointment_data = null;
+        }
+    }
+}
 </script>
 
 <template>
@@ -89,6 +111,25 @@ const useVaah = vaah();
                             value="Trashed"
                             severity="danger"></Badge>
                      {{prop.data.price ? '$'+prop.data.price : '-'}}
+                 </template>
+
+             </Column>
+
+             <Column field="appointments" header="No. of appointments"
+                     class="overflow-wrap-anywhere"
+                     :sortable="true">
+
+                 <template #body="prop">
+                     <Badge v-if="prop.data.deleted_at"
+                            value="Trashed"
+                            severity="danger"></Badge>
+                     <Button v-tooltip.right="'Click to view the appointments'"
+                             v-if="prop.data.appointments.length > 0"
+                             @click="showAppointmentDetails(prop.data.id)"
+                             severity="help"
+                     >{{prop.data.appointments.length}}
+                     </Button>
+                     <p v-else>No upcoming appointments</p>
                  </template>
 
              </Column>
@@ -182,5 +223,24 @@ const useVaah = vaah();
         <!--/paginator-->
 
     </div>
+
+    <Sidebar v-model:visible="state.visible" header="Sidebar" postion="right">
+<!--        <DataTable :value="state.appointment_data"-->
+<!--                   stripedRows-->
+<!--                   responsiveLayout="scroll">-->
+
+<!--            <Column field="name" header="Name"-->
+<!--                    class="overflow-wrap-anywhere"-->
+<!--                    :sortable="true">-->
+
+<!--                <template #body="prop">-->
+<!--                    {{prop}}-->
+<!--                </template>-->
+
+<!--            </Column>-->
+
+<!--        </DataTable>-->
+        {{state.appointment_data}}
+    </Sidebar>
 
 </template>
