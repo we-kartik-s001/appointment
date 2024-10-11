@@ -307,7 +307,8 @@ class Doctor extends VaahModel
                     }])
                     ->withCount(['appointments as cancelled_appointments_count' => function ($query) {
                         $query->where('status', 0);
-                    }]);
+                    }])
+                    ->selectRaw('price * (SELECT COUNT(*) FROM ap_appointments WHERE doctor_id = ap_doctors.id AND status = 1) as total_cost');
         $list = $list->paginate($rows);
 
         $response['success'] = true;

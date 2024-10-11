@@ -18,7 +18,7 @@ const chartOptions = ref(null);
 
 import { useConfirm } from "primevue/useconfirm";
 const confirm = useConfirm();
-
+const visible = ref(false);
 
 onMounted(async () => {
     document.title = 'Doctors - Appointments';
@@ -113,12 +113,49 @@ const totalCancelledAppointments = computed(() => {
         }, 0);
     }
 });
+
+const totalRevenueGenerated = computed(() => {
+    if(store.list.data){
+        return store.list.data.reduce((total, appointments) => {
+            return total + appointments.total_cost;
+        }, 0);
+    }
+});
 //-------------------------------------------------------------------------------
 </script>
 <template>
 
     <div class="grid" v-if="store.assets">
-        <div v-if="store.list.data" class="stat-block" style="display: flex; justify-content: flex-start; align-items: center;">
+            <Sidebar v-model:visible="visible" header="" position="right">
+                <template #header>
+<!--                    <div style="display: flex; justify-content: space-between; align-items: center;">-->
+<!--                        <h2 style="margin: 0;">Appointment Stats</h2>-->
+<!--                    </div>-->
+                </template>
+
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h4 style="margin: 0;">Appointment Stats</h4>
+                </div>
+
+                <div v-if="store.list.data.length > 0" class="card flex justify-content-center">
+                    <Chart type="pie" :data="chartData" :options="chartOptions" class="w-full md:w-30rem"/>
+                </div>
+                
+                <div v-else>
+                    <span>No Record Found</span>
+                </div>
+            </Sidebar>
+
+        <div v-if="store.list.data" class="stat-block" style="display: flex; justify-content: center; align-items: center; height: 100%;    ">
+            <Card style="width: 20rem; height: 10rem;margin-left: 10px; overflow: hidden">
+                <template #title>
+                    <span style="font-weight: bold; font-size: 20px;">Total Appointments</span>
+                </template>
+                <template #content>
+                    <span style="font-weight: bold; font-size: 50px;">{{totalActiveAppointments + totalCancelledAppointments}}</span>
+                </template>
+            </Card>
+
             <Card style="width: 20rem; height: 10rem;margin-left: 10px; overflow: hidden">
                 <template #title>
                     <span style="font-weight: bold; font-size: 20px;">Total Appointments Scheduled</span>
@@ -142,14 +179,20 @@ const totalCancelledAppointments = computed(() => {
                     <span style="font-weight: bold; font-size: 20px;">Total Revenue Generated</span>
                 </template>
                 <template #content>
-                    <span style="font-weight: bold; font-size: 50px;">${{totalCancelledAppointments}}</span>
+                    <span style="font-weight: bold; font-size: 50px;">${{totalRevenueGenerated}}</span>
                 </template>
             </Card>
+
+            <Button v-tooltip:top="'Graphical Report'"
+                    icon="pi pi-arrow-right"
+                    @click="visible = true"
+                    style="margin-left: 20px;"
+            />
         </div>
 
-        <div class="card flex justify-content-center" style="margin: auto;width: 100%; height: 200px;">
-            <Chart v-if="chartData && chartOptions" type="doughnut" :data="chartData" :options="chartOptions" class="w-full md:w-30rem" />
-        </div>
+<!--        <div class="card flex justify-content-center" style="margin: auto;width: 100%; height: 200px;">-->
+<!--            <Chart v-if="chartData && chartOptions" type="doughnut" :data="chartData" :options="chartOptions" class="w-full md:w-30rem" />-->
+<!--        </div>-->
         <div :class="'col-'+(store.show_filters?9:store.list_view_width)">
             <Panel class="is-small">
 
