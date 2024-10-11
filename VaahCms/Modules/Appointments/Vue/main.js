@@ -16,6 +16,8 @@ import StyleClass from 'primevue/styleclass';
 import Toast from 'primevue/toast';
 import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
+import Chart from "primevue/chart";
+import Card from "primevue/card";
 //-------------/PrimeVue Imports
 
 //-------------CRUD PrimeVue Imports
@@ -76,6 +78,7 @@ app.component('ConfirmDialog', ConfirmDialog);
 app.component('Menu', Menu);
 app.component('ProgressBar', ProgressBar);
 app.component('Toast', Toast);
+app.component('Chart',Chart);
 //-------------/PrimeVue Use
 
 // -------------CRUD PrimeVue Use
@@ -100,6 +103,7 @@ app.component('Sidebar',Sidebar)
 app.component('TreeTable',TreeTable);
 app.component('TabView',TabView);
 app.component('TabPanel',TabPanel);
+app.component('Card',Card);
 //-------------/CRUD PrimeVue Use
 
 

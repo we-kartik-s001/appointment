@@ -109,11 +109,11 @@ const showAppointmentDetails = (id) => {
                             value="Trashed"
                             severity="danger"></Badge>
                      <Button v-tooltip.right="'Click to view the appointments'"
-                             v-if="prop.data.appointments.length > 0"
+                             v-if="prop.data.active_appointments_count > 0"
                              @click="showAppointmentDetails(prop.data.id)"
                              severity="help"
                      >
-                        {{prop.data.appointments.length}}
+                        {{prop.data.active_appointments_count}}
                      </Button>
                      <p v-else>No upcoming appointments</p>
                  </template>
@@ -209,8 +209,7 @@ const showAppointmentDetails = (id) => {
         <!--/paginator-->
 
         <Sidebar v-model:visible="visible" header="Appointments" position="right" role="region" style="width: auto;">
-            <DrawerContent :doctorid = "doctorid"
-            />
+            <DrawerContent :doctorid = "doctorid" />
         </Sidebar>
     </div>
 </template>

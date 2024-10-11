@@ -301,7 +301,13 @@ class Doctor extends VaahModel
         }
 
         $list = $list->select(['id','name','email','phone','specialization','start_time','end_time','price'])
-                     ->with('appointments.patient');
+                     ->with('appointments.patient')
+                    ->withCount(['appointments as active_appointments_count' => function ($query) {
+                        $query->where('status', 1);
+                    }])
+                    ->withCount(['appointments as cancelled_appointments_count' => function ($query) {
+                        $query->where('status', 0);
+                    }]);
         $list = $list->paginate($rows);
 
         $response['success'] = true;

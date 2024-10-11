@@ -1,5 +1,5 @@
 <script setup>
-import {onMounted, reactive, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import {useRoute} from 'vue-router';
 
 import {useDoctorStore} from '../../stores/store-doctors'
@@ -13,6 +13,8 @@ import DoctorFilters from './components/DoctorFilters.vue';
 const store = useDoctorStore();
 const root = useRootStore();
 const route = useRoute();
+const chartData = ref(null);
+const chartOptions = ref(null);
 
 import { useConfirm } from "primevue/useconfirm";
 const confirm = useConfirm();
@@ -52,6 +54,9 @@ onMounted(async () => {
 
     await store.getListCreateMenu();
 
+    chartData.value = setChartData();
+    chartOptions.value = setChartOptions();
+
 });
 
 //--------form_menu
@@ -61,12 +66,90 @@ const toggleCreateMenu = (event) => {
 };
 //--------/form_menu
 
+//-----------------------------------------------------------------------//
+const setChartData = () => {
+    const documentStyle = getComputedStyle(document.body);
 
+    return {
+        labels: ['Scheduled Appointments', 'Cancelled Appointments'],
+        datasets: [
+            {
+                data: [totalActiveAppointments, totalCancelledAppointments],
+                backgroundColor: [documentStyle.getPropertyValue('--green-500'), documentStyle.getPropertyValue('--red-500')],
+                hoverBackgroundColor: [documentStyle.getPropertyValue('--green-400'), documentStyle.getPropertyValue('--red-400')]
+            }
+        ]
+    };
+};
+
+const setChartOptions = () => {
+    const documentStyle = getComputedStyle(document.documentElement);
+    const textColor = documentStyle.getPropertyValue('--text-color');
+
+    return {
+        plugins: {
+            legend: {
+                labels: {
+                    usePointStyle: true,
+                    color: textColor
+                }
+            }
+        }
+    };
+};
+
+const totalActiveAppointments = computed(() => {
+    if(store.list.data){
+        return store.list.data.reduce((total, appointments) => {
+            return total + appointments.active_appointments_count;
+        }, 0);
+    }
+});
+
+const totalCancelledAppointments = computed(() => {
+    if(store.list.data){
+        return store.list.data.reduce((total, appointments) => {
+            return total + appointments.cancelled_appointments_count;
+        }, 0);
+    }
+});
+//-------------------------------------------------------------------------------
 </script>
 <template>
 
     <div class="grid" v-if="store.assets">
+        <div v-if="store.list.data" class="stat-block" style="display: flex; justify-content: flex-start; align-items: center;">
+            <Card style="width: 20rem; height: 10rem;margin-left: 10px; overflow: hidden">
+                <template #title>
+                    <span style="font-weight: bold; font-size: 20px;">Total Appointments Scheduled</span>
+                </template>
+                <template #content>
+                   <span style="font-weight: bold; font-size: 50px;">{{totalActiveAppointments}}</span>
+                </template>
+            </Card>
 
+            <Card style="width: 20rem; height: 10rem;margin-left: 10px; overflow: hidden">
+                <template #title>
+                    <span style="font-weight: bold; font-size: 20px;">Total Appointments Cancelled</span>
+                </template>
+                <template #content>
+                    <span style="font-weight: bold; font-size: 50px;">{{totalCancelledAppointments}}</span>
+                </template>
+            </Card>
+
+            <Card style="width: 20rem; height: 10rem;margin-left: 10px; overflow: hidden">
+                <template #title>
+                    <span style="font-weight: bold; font-size: 20px;">Total Revenue Generated</span>
+                </template>
+                <template #content>
+                    <span style="font-weight: bold; font-size: 50px;">${{totalCancelledAppointments}}</span>
+                </template>
+            </Card>
+        </div>
+
+        <div class="card flex justify-content-center" style="margin: auto;width: 100%; height: 200px;">
+            <Chart v-if="chartData && chartOptions" type="doughnut" :data="chartData" :options="chartOptions" class="w-full md:w-30rem" />
+        </div>
         <div :class="'col-'+(store.show_filters?9:store.list_view_width)">
             <Panel class="is-small">
 
