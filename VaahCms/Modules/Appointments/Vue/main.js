@@ -37,6 +37,9 @@ import Dropdown from "primevue/dropdown";
 import InputNumber from "primevue/inputnumber";
 import Dialog from "primevue/dialog";
 import Sidebar from "primevue/sidebar";
+import TreeTable from "primevue/treetable";
+import TabView from "primevue/tabview";
+import TabPanel from "primevue/tabpanel";
 //-------------/CRUD PrimeVue Imports
 
 
@@ -94,6 +97,9 @@ app.component('Dropdown',Dropdown);
 app.component('InputNumber',InputNumber);
 app.component('Dialog',Dialog);
 app.component('Sidebar',Sidebar)
+app.component('TreeTable',TreeTable);
+app.component('TabView',TabView);
+app.component('TabPanel',TabPanel);
 //-------------/CRUD PrimeVue Use
 
 

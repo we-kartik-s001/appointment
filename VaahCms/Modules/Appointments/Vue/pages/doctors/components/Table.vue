@@ -1,31 +1,16 @@
 <script setup>
 import { vaah } from '../../../vaahvue/pinia/vaah'
 import { useDoctorStore } from '../../../stores/store-doctors'
-import {reactive} from 'vue';
-
+import {ref} from "vue";
+import DrawerContent from './DrawerContent.vue';
 const store = useDoctorStore();
 const useVaah = vaah();
-
-const state = reactive({
-    visible: false,
-    appointment_data: null,
-});
-
+const visible = ref(false);
+const doctorid = ref(null);
 const showAppointmentDetails = (id) => {
-    state.visible = !state.visible;
-    if (state.visible) {
-        if(store.list.data){
-            const foundDoctor = store.list.data.find(ele => ele.id === id);
-            if (foundDoctor) {
-                state.appointment_data = foundDoctor.appointments || [];
-            } else {
-                state.appointment_data = [];
-            }
-        }
-        else {
-            state.appointment_data = null;
-        }
-    }
+    visible.value = !visible.value;
+    doctorid.value = id;
+    console.log(doctorid.value);
 }
 </script>
 
@@ -127,7 +112,8 @@ const showAppointmentDetails = (id) => {
                              v-if="prop.data.appointments.length > 0"
                              @click="showAppointmentDetails(prop.data.id)"
                              severity="help"
-                     >{{prop.data.appointments.length}}
+                     >
+                        {{prop.data.appointments.length}}
                      </Button>
                      <p v-else>No upcoming appointments</p>
                  </template>
@@ -222,25 +208,9 @@ const showAppointmentDetails = (id) => {
         </Paginator>
         <!--/paginator-->
 
+        <Sidebar v-model:visible="visible" header="Appointments" position="right" role="region" style="width: auto;">
+            <DrawerContent :doctorid = "doctorid"
+            />
+        </Sidebar>
     </div>
-
-    <Sidebar v-model:visible="state.visible" header="Sidebar" postion="right">
-<!--        <DataTable :value="state.appointment_data"-->
-<!--                   stripedRows-->
-<!--                   responsiveLayout="scroll">-->
-
-<!--            <Column field="name" header="Name"-->
-<!--                    class="overflow-wrap-anywhere"-->
-<!--                    :sortable="true">-->
-
-<!--                <template #body="prop">-->
-<!--                    {{prop}}-->
-<!--                </template>-->
-
-<!--            </Column>-->
-
-<!--        </DataTable>-->
-        {{state.appointment_data}}
-    </Sidebar>
-
 </template>
