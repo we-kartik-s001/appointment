@@ -5,9 +5,9 @@ use VaahCms\Modules\Appointments\Http\Controllers\Backend\DoctorsController;
 Route::group(
     [
         'prefix' => 'backend/appointments/doctors',
-        
+
         'middleware' => ['web', 'has.backend.access'],
-        
+
 ],
 function () {
     /**
@@ -43,6 +43,13 @@ function () {
      */
     Route::post('/', [DoctorsController::class, 'createItem'])
         ->name('vh.backend.appointments.doctors.create');
+
+    /**
+     * Get Distinct Doctor Specialization
+     */
+    Route::get('/specialization',  [DoctorsController::class, 'getSpecialization'])
+        ->name('vh.backend.appointments.doctors.specialization.read');;
+
     /**
      * Get Item
      */
@@ -72,5 +79,4 @@ function () {
         ->name('vh.backend.appointments.doctors.item.action');
 
     //---------------------------------------------------------
-
 });

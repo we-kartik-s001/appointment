@@ -1,10 +1,17 @@
 <script setup>
 import { vaah } from '../../../vaahvue/pinia/vaah'
 import { useDoctorStore } from '../../../stores/store-doctors'
-
+import {ref} from "vue";
+import DrawerContent from './DrawerContent.vue';
 const store = useDoctorStore();
 const useVaah = vaah();
-
+const visible = ref(false);
+const doctorid = ref(null);
+const showAppointmentDetails = (id) => {
+    visible.value = !visible.value;
+    doctorid.value = id;
+    console.log(doctorid.value);
+}
 </script>
 
 <template>
@@ -80,6 +87,39 @@ const useVaah = vaah();
 
              </Column>
 
+             <Column field="price" header="Price per slot"
+                     class="overflow-wrap-anywhere"
+                     :sortable="true">
+
+                 <template #body="prop">
+                     <Badge v-if="prop.data.deleted_at"
+                            value="Trashed"
+                            severity="danger"></Badge>
+                     {{prop.data.price ? '$'+prop.data.price : '-'}}
+                 </template>
+
+             </Column>
+
+             <Column field="appointments" header="No. of appointments"
+                     class="overflow-wrap-anywhere"
+                     :sortable="true">
+
+                 <template #body="prop">
+                     <Badge v-if="prop.data.deleted_at"
+                            value="Trashed"
+                            severity="danger"></Badge>
+                     <Button v-tooltip.right="'Click to view the appointments'"
+                             v-if="prop.data.active_appointments_count > 0"
+                             @click="showAppointmentDetails(prop.data.id)"
+                             severity="help"
+                     >
+                        {{prop.data.active_appointments_count}}
+                     </Button>
+                     <p v-else>No upcoming appointments</p>
+                 </template>
+
+             </Column>
+
              <Column field="start_time" header="Start Time"
                      class="overflow-wrap-anywhere"
                      :sortable="true">
@@ -105,7 +145,7 @@ const useVaah = vaah();
                  </template>
 
              </Column>
-             
+
             <Column field="actions" style="width:150px;"
                     :style="{width: store.getActionWidth() }"
                     :header="store.getActionLabel()">
@@ -168,6 +208,8 @@ const useVaah = vaah();
         </Paginator>
         <!--/paginator-->
 
+        <Sidebar v-model:visible="visible" header="Appointments" position="right" role="region" style="width: auto;">
+            <DrawerContent :doctorid = "doctorid" />
+        </Sidebar>
     </div>
-
 </template>

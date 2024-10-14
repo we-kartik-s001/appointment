@@ -25,12 +25,12 @@ const items = ref([
     {
         label: 'Appointments',
         items: [
-            // {
-            //     label: 'Dashboard',
-            //     icon: 'fa-regular fa-chart-bar',
-            //     route: "/",
-            //     permissions: [ "can-login-in-backend", "appointments-can-create-patients" , "appointments-can-create-doctors" ]
-            // },
+            {
+                label: 'Dashboard',
+                icon: 'fa-regular fa-chart-bar',
+                route: "/",
+                permissions: [ "can-login-in-backend", "appointments-can-create-patients" , "appointments-can-create-doctors" ]
+            },
             {
                 label: 'Doctors',
                 icon: 'fa-regular fa-chart-bar',

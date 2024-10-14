@@ -19,6 +19,7 @@ class ApDoctors extends Migration
                 $table->id()->index();
                 $table->string('name',20)->nullable();
                 $table->string('email',50)->unique()->nullable();
+                $table->unsignedSmallInteger('price')->nullable();
                 $table->unsignedBigInteger('phone')->nullable();
                 $table->string('specialization',50)->nullable();
                 $table->dateTime('start_time')->nullable();

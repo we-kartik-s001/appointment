@@ -32,6 +32,7 @@ class Doctor extends VaahModel
         'id',
         'name',
         'email',
+        'price',
         'phone',
         'specialization',
         'start_time',
@@ -196,7 +197,6 @@ class Doctor extends VaahModel
     //-------------------------------------------------
     public function scopeIsActiveFilter($query, $filter)
     {
-
         if(!isset($filter['is_active'])
             || is_null($filter['is_active'])
             || $filter['is_active'] === 'null'
@@ -218,6 +218,36 @@ class Doctor extends VaahModel
 
     }
     //-------------------------------------------------
+
+    public function scopeIsFieldFilter($query, $field_filter){
+        $filter_type = array_keys($field_filter);
+        if(count($field_filter) <= 0)
+        {
+            return $query;
+        }
+        foreach($filter_type as $filter){
+            $filter_value = $field_filter[$filter];
+            switch ($filter){
+                case 'specialization' :
+                    $query->where('specialization',$filter_value);
+                    break;
+                case 'price' :
+                    $parts = explode('-', $filter_value);
+                    $minPrice = floatval(preg_replace('/[^0-9.]/', '', $parts[0]));
+                    $maxPrice = floatval(preg_replace('/[^0-9.]/', '', $parts[1]));
+                    $query->whereBetween('price',[$minPrice,$maxPrice]);
+                    break;
+                case 'timings' :
+                    $parts = explode('-', $filter_value);
+                    $minTime = Carbon::parse($parts[0])->format('H:i');
+                    $maxTime = Carbon::parse($parts[1])->format('H:i');
+                    $query->whereRaw('TIME(start_time) BETWEEN ? AND ?', [$minTime,$maxTime]);
+                    break;
+            }
+        }
+        return $query;
+    }
+
     public function scopeTrashedFilter($query, $filter)
     {
 
@@ -247,7 +277,6 @@ class Doctor extends VaahModel
         foreach ($search_array as $search_item){
             $query->where(function ($q1) use ($search_item) {
                 $q1->where('name', 'LIKE', '%' . $search_item . '%')
-                    ->orWhere('slug', 'LIKE', '%' . $search_item . '%')
                     ->orWhere('id', 'LIKE', $search_item . '%');
             });
         }
@@ -260,6 +289,9 @@ class Doctor extends VaahModel
         $list->isActiveFilter($request->filter);
         $list->trashedFilter($request->filter);
         $list->searchFilter($request->filter);
+        if($request->has('field_filter')){
+            $list->isFieldFilter($request->field_filter);
+        }
 
         $rows = config('vaahcms.per_page');
 
@@ -268,7 +300,15 @@ class Doctor extends VaahModel
             $rows = $request->rows;
         }
 
-        $list = $list->select(['id','name','email','phone','specialization','start_time','end_time']);
+        $list = $list->select(['id','name','email','phone','specialization','start_time','end_time','price'])
+                     ->with('appointments.patient')
+                    ->withCount(['appointments as active_appointments_count' => function ($query) {
+                        $query->where('status', 1);
+                    }])
+                    ->withCount(['appointments as cancelled_appointments_count' => function ($query) {
+                        $query->where('status', 0);
+                    }])
+                    ->selectRaw('price * (SELECT COUNT(*) FROM ap_appointments WHERE doctor_id = ap_doctors.id AND status = 1) as total_cost');
         $list = $list->paginate($rows);
 
         $response['success'] = true;
@@ -567,6 +607,7 @@ class Doctor extends VaahModel
 
         $rules = array(
             'name' => 'required|string|max:20',
+            'price' => 'required|integer|max:100',
             'email' => 'required|email|max:50|unique:ap_doctors,email,'.$id,
             'phone' => 'required|integer|digits:10',
             'specialization' => 'required|string|max:50',
@@ -625,18 +666,55 @@ class Doctor extends VaahModel
             'model_namespace' => self::class,
             'except' => self::getUnFillableColumns()
         ]);
-        $fillable = VaahSeeder::fill($request);
-        if(!$fillable['success']){
-            return $fillable;
-        }
-        $inputs = $fillable['data']['fill'];
+//        $fillable = VaahSeeder::fill($request);
+//        if(!$fillable['success']){
+//            return $fillable;
+//        }
 
+        $model = $request->model_namespace;
+        $model = new $model();
+        $table = $model->getTable();
+//        $inputs = $fillable['data']['fill'];
+        $fields = self::getFillableColumns();
         $faker = Factory::create();
 
         /*
          * You can override the filled variables below this line.
          * You should also return relationship from here
          */
+
+        if(count($fields) > 0){
+            foreach ($fields as $field){
+                $type = \DB::getSchemaBuilder()->getColumnType($table, $field);
+                switch ($type){
+                    case 'bigint':
+                        $inputs[$field] = random_int(1000000000, 9999999999);;
+                        break;
+
+                    case 'varchar':
+                        if($field === 'name'){
+                            $inputs[$field] = $faker->text(10);
+                        }elseif ($field === 'specialization'){
+                            $inputs[$field] = 'Medicine';
+                        }elseif($field === 'email'){
+                            $inputs[$field] = $faker->email(60);
+                        }
+                        break;
+
+                    case 'datetime':
+                        $time = Carbon::now()->timezone('Asia/Kolkata');
+                        if($field === 'start_time'){
+                            $inputs[$field] = Carbon::parse(Carbon::now()->minute(round($time->minute / 15) * 15)->second(0))->timezone('Asia/Kolkata')->format('Y-m-d h:i:s A');
+                        }
+                        else{
+                            $inputs[$field] = Carbon::parse(Carbon::now()->minute(round($time->minute / 15) * 15)->second(0)->addMinutes(30))->timezone('Asia/Kolkata')->format('Y-m-d h:i:s A');
+                        }
+                        break;
+                    case 'smallint':
+                        $inputs[$field] = rand(1,100);
+                }
+            }
+        }
 
         if(!$is_response_return){
             return $inputs;
@@ -657,5 +735,9 @@ class Doctor extends VaahModel
 
     public static function formatTimeZone($time){
         return Carbon::parse($time)->timezone('Asia/Kolkata');
+    }
+
+    public static function getSpecialization(){
+        return self::distinct()->pluck('specialization');
     }
 }

@@ -19,6 +19,11 @@ let empty_states = {
             trashed: null,
             sort: null,
         },
+        field_filter: {
+            price: null,
+            specialization: null,
+            timings: null
+        }
     },
     action: {
         type: null,
@@ -52,6 +57,7 @@ export const useDoctorStore = defineStore({
         route_prefix: 'doctors.',
         view: 'large',
         show_filters: false,
+        show_field_filters: false,
         list_view_width: 12,
         form: {
             type: 'Create',
@@ -60,12 +66,14 @@ export const useDoctorStore = defineStore({
         },
         is_list_loading: null,
         count_filters: 0,
+        count_field_filters: 0,
         list_selected_menu: [],
         list_bulk_menu: [],
         list_create_menu: [],
         item_menu_list: [],
         item_menu_state: null,
-        form_menu_list: []
+        form_menu_list: [],
+        specializations: null
     }),
     getters: {
 
@@ -145,7 +153,6 @@ export const useDoctorStore = defineStore({
                     }
 
                     this.route = newVal;
-
                     if(newVal.params.id){
                         this.getItem(newVal.params.id);
                     }
@@ -159,6 +166,12 @@ export const useDoctorStore = defineStore({
         watchStates()
         {
             watch(this.query.filter, (newVal,oldVal) =>
+                {
+                    this.delayedSearch();
+                },{deep: true}
+            )
+
+            watch(this.query.field_filter, (newVal,oldVal) =>
                 {
                     this.delayedSearch();
                 },{deep: true}
@@ -583,10 +596,16 @@ export const useDoctorStore = defineStore({
         countFilters: function (query)
         {
             this.count_filters = 0;
-            if(query && query.filter)
+            this.count_field_filters = 0;
+            if(query)
             {
-                let filter = vaah().cleanObject(query.filter);
-                this.count_filters = Object.keys(filter).length;
+                if(query.filter){
+                    let filter = vaah().cleanObject(query.filter);
+                    this.count_filters = Object.keys(filter).length;
+                }
+                else if(query.field_filter){
+                   this.count_field_filters = Object.keys(query.field_filter).length;
+                }
             }
         },
         //---------------------------------------------------------------------
@@ -611,6 +630,11 @@ export const useDoctorStore = defineStore({
             for(let key in this.query.filter)
             {
                 this.query.filter[key] = null;
+            }
+
+            for(let key in this.query.field_filter)
+            {
+                this.query.field_filter[key] = null;
             }
             await this.updateUrlQueryString(this.query);
         },
@@ -931,6 +955,17 @@ export const useDoctorStore = defineStore({
 
         },
         //---------------------------------------------------------------------
+        showFieldFilters(){
+            this.show_field_filters = !this.show_field_filters;
+        },
+        async getSpecializationList(){
+            await vaah().ajax(
+                this.ajax_url.concat('/specialization'),
+                (data,res) => {
+                    this.specializations = res.data;
+                }
+            );
+        }
     }
 });
 
