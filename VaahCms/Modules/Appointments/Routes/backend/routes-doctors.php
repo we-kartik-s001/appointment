@@ -84,5 +84,7 @@ function () {
         ->name('vh.backend.appointments.doctors.bulkupload.action');
 
     Route::get('/exportDoctors/list',[DoctorsController::class,'exportDoctors'])
-        ->name('vh.backend.appointments.doctors.bulkexport.action');;
+        ->name('vh.backend.appointments.doctors.bulkexport.action');
+
+    Route::post('/importDoctors/list',[DoctorsController::class,'importDoctors']);
 });

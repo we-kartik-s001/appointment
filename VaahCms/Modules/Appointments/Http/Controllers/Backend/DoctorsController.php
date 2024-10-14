@@ -1,5 +1,6 @@
 <?php namespace VaahCms\Modules\Appointments\Http\Controllers\Backend;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use VaahCms\Modules\Appointments\Models\Doctor;
@@ -249,8 +250,27 @@ class DoctorsController extends Controller
         }
     }
 
-    public function bulkUpload(Request $request){
+    public function importDoctors(Request $request){
+        $fileContents = $request->json()->all();
+        if(!$fileContents){
+            return ;
+        }
 
+        foreach ($fileContents as $content) {
+            Doctor::updateOrCreate(
+                ['id' => $content['ID']],
+                [
+                    'name' => $content['Name'],
+                    'email' => $content['Email'],
+                    'price' => $content['Price'],
+                    'phone' => $content['Phone'],
+                    'specialization' => $content['Specialization'],
+//                    'start_time' => Carbon::parse('Y-m-d h:i:s A'),
+//                    'end_time' => Carbon::parse('Y-m-d h:i:s A'),
+                ]
+            );
+        }
+        return response()->json(['message' => 'Doctors updated/created successfully!']);
     }
 
     public function exportDoctors(){

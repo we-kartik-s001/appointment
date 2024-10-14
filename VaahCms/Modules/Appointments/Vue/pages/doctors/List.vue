@@ -122,18 +122,48 @@ const totalRevenueGenerated = computed(() => {
     }
 });
 
-const onUpload = () => {
-    toast.add({ severity: 'info', summary: 'Success', detail: 'File Uploaded', life: 3000 });
+const fileInput = ref(null);
+
+const openFileDialog = () => {
+    fileInput.value.click();
 };
 
-const uploadHeaders = () => {
-    return {
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-    };
+const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const contents = e.target.result;
+            const jsonData = csvToJson(contents);
+            console.log('Parsed JSON data:', jsonData);
+            importDoctors(jsonData);
+        };
+        reader.readAsText(file);
+    }
+};
+
+const csvToJson = (csv) => {
+    const lines = csv.split('\n');
+    const result = [];
+    const headers = lines[0].split(',');
+
+    for (let i = 1; i < lines.length; i++) {
+        const obj = {};
+        const currentLine = lines[i].split(',');
+        for (let j = 0; j < headers.length; j++) {
+            obj[headers[j].trim()] = currentLine[j] ? currentLine[j].trim() : '';
+        }
+        result.push(obj);
+    }
+    return result;
 };
 
 const exportDoctors = () => {
     store.exportDoctors();
+}
+
+const importDoctors = (jsonData) => {
+    store.importDoctors(jsonData);
 }
 //-------------------------------------------------------------------------------
 </script>
@@ -227,19 +257,8 @@ const exportDoctors = () => {
                 </template>
 
                 <div class="card">
-                    <Toast />
-                    <Button label="Import Doctors"
-                            @click="exportDoctors"/>
-<!--                    <FileUpload mode="basic"-->
-<!--                                name="demo[]"-->
-
-<!--                                accept="image/*"-->
-<!--                                :maxFileSize="1000000"-->
-<!--                                @upload="onUpload"-->
-<!--                                :auto="true"-->
-<!--                                chooseLabel="Import Doctors"-->
-<!--                                :uploadHeaders="uploadHeaders()"-->
-<!--                    />-->
+                    <Button @click="openFileDialog">Upload Doctors CSV</Button>
+                    <input type="file" ref="fileInput" @change="handleFileUpload" accept=".csv" style="display: none;" />
                     <Button label="Export Doctors"
                             @click="exportDoctors"
                             style="margin-left: 5px;"

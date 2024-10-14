@@ -987,6 +987,20 @@ export const useDoctorStore = defineStore({
             } catch (error) {
                 console.error('Error downloading file:', error);
             }
+        },
+
+        async importDoctors(fileData){
+            await vaah().ajax(
+                this.ajax_url.concat('/importDoctors/list'),
+                (data, res) => {
+                    console.log(res.data)
+                },
+                {
+                    params: fileData,
+                    method: 'post',
+                    headers: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            );
         }
     }
 });
