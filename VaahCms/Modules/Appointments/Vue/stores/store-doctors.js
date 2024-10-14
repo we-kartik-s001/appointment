@@ -993,6 +993,10 @@ export const useDoctorStore = defineStore({
             await vaah().ajax(
                 this.ajax_url.concat('/importDoctors/list'),
                 (data, res) => {
+                    if(res.data){
+                        this.getList();
+                    }
+
                     console.log(res.data)
                 },
                 {
