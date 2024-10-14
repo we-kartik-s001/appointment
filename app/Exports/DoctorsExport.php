@@ -22,10 +22,10 @@ class DoctorsExport implements FromCollection, WithHeadings
                 'Price' => $doctor->price,
                 'Phone' => $doctor->phone,
                 'Specialization' => $doctor->specialization,
-                'Start Time' =>  Carbon::parse($doctor->start_time)->format('Y-m-d h:i:s A'),
-                'End Time' =>  Carbon::parse($doctor->end_time)->format('Y-m-d h:i:s A'),
-                'Created At' => Carbon::parse($doctor->created_at)->format('Y-m-d H:i:s'),
-                'Updated At' => Carbon::parse($doctor->updated_at)->format('Y-m-d H:i:s'),
+                'Start_Time' =>  Carbon::parse($doctor->start_time)->format('Y-m-d h:i:s A'),
+                'End_Time' =>  Carbon::parse($doctor->end_time)->format('Y-m-d h:i:s A'),
+                'Created_At' => Carbon::parse($doctor->created_at)->format('Y-m-d H:i:s'),
+                'Updated_At' => Carbon::parse($doctor->updated_at)->format('Y-m-d H:i:s'),
             ];
         });
     }
@@ -39,10 +39,10 @@ class DoctorsExport implements FromCollection, WithHeadings
             'Price',
             'Phone',
             'Specialization',
-            'Start Time',
-            'End Time',
-            'Created At',
-            'Updated At',
+            'Start_Time',
+            'End_Time',
+            'Created_At',
+            'Updated_At',
         ];
     }
 }

@@ -255,22 +255,19 @@ class DoctorsController extends Controller
         if(!$fileContents){
             return ;
         }
-
-        foreach ($fileContents as $content) {
-            Doctor::updateOrCreate(
-                ['id' => $content['ID']],
-                [
-                    'name' => $content['Name'],
-                    'email' => $content['Email'],
-                    'price' => $content['Price'],
-                    'phone' => $content['Phone'],
-                    'specialization' => $content['Specialization'],
-//                    'start_time' => Carbon::parse('Y-m-d h:i:s A'),
-//                    'end_time' => Carbon::parse('Y-m-d h:i:s A'),
-                ]
-            );
+        try{
+            return Doctor::importDoctors($fileContents);
+        }catch (\Exception $e){
+            $response = [];
+            $response['success'] = false;
+            if(env('APP_DEBUG')){
+                $response['errors'][] = $e->getMessage();
+                $response['hint'] = $e->getTrace();
+            } else{
+                $response['errors'][] = trans("vaahcms-general.something_went_wrong");
+            }
+            return $response;
         }
-        return response()->json(['message' => 'Doctors updated/created successfully!']);
     }
 
     public function exportDoctors(){

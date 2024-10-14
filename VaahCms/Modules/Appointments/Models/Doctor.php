@@ -747,4 +747,22 @@ class Doctor extends VaahModel
     public static function exportDoctors(){
         return Excel::download(new DoctorsExport,'doctors.csv');
     }
+
+    public static function importDoctors($fileContents){
+        foreach ($fileContents as $content) {
+            Doctor::updateOrCreate(
+                ['id' => $content['ID']],
+                [
+                    'name' => $content['Name'],
+                    'email' => $content['Email'],
+                    'price' => $content['Price'],
+                    'phone' => $content['Phone'],
+                    'specialization' => $content['Specialization'],
+                    'start_time' => Carbon::parse($content['Start_Time'])->format('Y-m-d H:i:s'),
+                    'end_time' => Carbon::parse($content['End_Time'])->format('Y-m-d H:i:s'),
+                ]
+            );
+        }
+        return response()->json(['message' => 'Doctors updated/created successfully!']);
+    }
 }
