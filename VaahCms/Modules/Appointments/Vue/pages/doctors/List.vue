@@ -121,6 +121,20 @@ const totalRevenueGenerated = computed(() => {
         }, 0);
     }
 });
+
+const onUpload = () => {
+    toast.add({ severity: 'info', summary: 'Success', detail: 'File Uploaded', life: 3000 });
+};
+
+const uploadHeaders = () => {
+    return {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+    };
+};
+
+const exportDoctors = () => {
+    store.exportDoctors();
+}
 //-------------------------------------------------------------------------------
 </script>
 <template>
@@ -140,7 +154,7 @@ const totalRevenueGenerated = computed(() => {
                 <div v-if="store.list.data.length > 0" class="card flex justify-content-center">
                     <Chart type="pie" :data="chartData" :options="chartOptions" class="w-full md:w-30rem"/>
                 </div>
-                
+
                 <div v-else>
                     <span>No Record Found</span>
                 </div>
@@ -187,6 +201,8 @@ const totalRevenueGenerated = computed(() => {
                     icon="pi pi-arrow-right"
                     @click="visible = true"
                     style="margin-left: 20px;"
+                    severity="success"
+                    rounded
             />
         </div>
 
@@ -210,10 +226,28 @@ const totalRevenueGenerated = computed(() => {
 
                 </template>
 
+                <div class="card">
+                    <Toast />
+                    <Button label="Import Doctors"
+                            @click="exportDoctors"/>
+<!--                    <FileUpload mode="basic"-->
+<!--                                name="demo[]"-->
+
+<!--                                accept="image/*"-->
+<!--                                :maxFileSize="1000000"-->
+<!--                                @upload="onUpload"-->
+<!--                                :auto="true"-->
+<!--                                chooseLabel="Import Doctors"-->
+<!--                                :uploadHeaders="uploadHeaders()"-->
+<!--                    />-->
+                    <Button label="Export Doctors"
+                            @click="exportDoctors"
+                            style="margin-left: 5px;"
+                    />
+                </div>
+
                 <template #icons>
-
                     <div class="p-inputgroup">
-
                     <Button data-testid="doctors-list-create"
                             class="p-button-sm"
                             @click="store.toForm()">

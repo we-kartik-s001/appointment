@@ -1,5 +1,6 @@
 <?php namespace VaahCms\Modules\Appointments\Models;
 
+use App\Exports\DoctorsExport;
 use Carbon\Carbon;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -13,6 +14,7 @@ use WebReinvent\VaahCms\Models\VaahModel;
 use WebReinvent\VaahCms\Models\User;
 use WebReinvent\VaahCms\Libraries\VaahSeeder;
 use VaahCms\Modules\Appointments\Mails\NotifyUsersOfDoctorsAvailaibiltyMail;
+use Maatwebsite\Excel\Facades\Excel;
 
 class Doctor extends VaahModel
 {
@@ -740,5 +742,9 @@ class Doctor extends VaahModel
 
     public static function getSpecialization(){
         return self::distinct()->pluck('specialization');
+    }
+
+    public static function exportDoctors(){
+        return Excel::download(new DoctorsExport,'doctors.csv');
     }
 }
