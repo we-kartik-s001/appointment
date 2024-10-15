@@ -73,7 +73,9 @@ export const useDoctorStore = defineStore({
         item_menu_list: [],
         item_menu_state: null,
         form_menu_list: [],
-        specializations: null
+        specializations: null,
+        upload_errors: [],
+        show_error_dialog: false
     }),
     getters: {
 
@@ -993,11 +995,12 @@ export const useDoctorStore = defineStore({
             await vaah().ajax(
                 this.ajax_url.concat('/importDoctors/list'),
                 (data, res) => {
-                    if(res.data){
+                    if(res.data.success){
                         this.getList();
+                    }else{
+                        this.upload_errors = res.data.upload_errors;
+                        this.show_error_dialog = true
                     }
-
-                    console.log(res.data)
                 },
                 {
                     params: fileData,

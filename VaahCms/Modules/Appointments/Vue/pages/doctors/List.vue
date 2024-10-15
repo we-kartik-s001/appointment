@@ -1,5 +1,5 @@
 <script setup>
-import {computed, onMounted, ref} from "vue";
+import {computed, onMounted, ref, watch} from "vue";
 import {useRoute} from 'vue-router';
 
 import {useDoctorStore} from '../../stores/store-doctors'
@@ -165,11 +165,38 @@ const exportDoctors = () => {
 const importDoctors = (jsonData) => {
     store.importDoctors(jsonData);
 }
+
+watch(() => store.upload_errors,(newVal, oldVal) => {
+    console.log('upload error')
+})
 //-------------------------------------------------------------------------------
 </script>
 <template>
 
     <div class="grid" v-if="store.assets">
+        <Sidebar v-model:visible="store.show_error_dialog" position="full">
+<!--            {{store.upload_errors}}-->
+            <div v-if="store.upload_errors.length > 0">
+                <table>
+                    <thead>
+                    <tr>
+                        <td>Line No</td>
+                        <td>Erros</td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(error,index) in store.upload_errors" :key="index">
+                            <td>{{error.record_no}}</td>
+                            <td>
+                                <p v-for="(err,index) in error.errors" :key="index">
+                                    {{err}}
+                                </p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </Sidebar>
             <Sidebar v-model:visible="visible" header="" position="right">
                 <template #header>
 <!--                    <div style="display: flex; justify-content: space-between; align-items: center;">-->
@@ -190,7 +217,7 @@ const importDoctors = (jsonData) => {
                 </div>
             </Sidebar>
 
-        <div v-if="store.list.data" class="stat-block" style="display: flex; justify-content: center; align-items: center; height: 100%;    ">
+        <div v-if="store.list.data.length > 0" class="stat-block" style="display: flex; justify-content: center; align-items: center; height: 100%;    ">
             <Card style="width: 20rem; height: 10rem;margin-left: 10px; overflow: hidden">
                 <template #title>
                     <span style="font-weight: bold; font-size: 20px;">Total Appointments</span>
@@ -236,9 +263,6 @@ const importDoctors = (jsonData) => {
             />
         </div>
 
-<!--        <div class="card flex justify-content-center" style="margin: auto;width: 100%; height: 200px;">-->
-<!--            <Chart v-if="chartData && chartOptions" type="doughnut" :data="chartData" :options="chartOptions" class="w-full md:w-30rem" />-->
-<!--        </div>-->
         <div :class="'col-'+(store.show_filters?9:store.list_view_width)">
             <Panel class="is-small">
 
@@ -257,11 +281,15 @@ const importDoctors = (jsonData) => {
                 </template>
 
                 <div class="card">
-                    <Button @click="openFileDialog">Upload Doctors CSV</Button>
+                    <Button @click="openFileDialog"
+                            style="background-color: #224e90; color: #fff;"
+                            label="Import CSV"
+                    />
+
                     <input type="file" ref="fileInput" @change="handleFileUpload" accept=".csv" style="display: none;" />
-                    <Button label="Export Doctors"
-                            @click="exportDoctors"
-                            style="margin-left: 5px;"
+                    <Button @click="exportDoctors"
+                            style="margin-left: 5px; background-color: #c46862; color: #fff;"
+                            label="Export CSV"
                     />
                 </div>
 

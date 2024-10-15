@@ -14,7 +14,7 @@ class DoctorsExport implements FromCollection, WithHeadings
     */
     public function collection()
     {
-        return Doctor::all()->map(function ($doctor) {
+        $doctors = Doctor::all()->map(function ($doctor) {
             return [
                 'ID' => $doctor->id,
                 'Name' => $doctor->name,
@@ -22,12 +22,13 @@ class DoctorsExport implements FromCollection, WithHeadings
                 'Price' => $doctor->price,
                 'Phone' => $doctor->phone,
                 'Specialization' => $doctor->specialization,
-                'Start_Time' =>  Carbon::parse($doctor->start_time)->format('Y-m-d h:i:s A'),
-                'End_Time' =>  Carbon::parse($doctor->end_time)->format('Y-m-d h:i:s A'),
-                'Created_At' => Carbon::parse($doctor->created_at)->format('Y-m-d H:i:s'),
-                'Updated_At' => Carbon::parse($doctor->updated_at)->format('Y-m-d H:i:s'),
+                'Start_Time' =>  $doctor->start_time,
+                'End_Time' =>  $doctor->end_time,
+                'Created_At' => $doctor->created_at,
+                'Updated_At' => $doctor->updated_at
             ];
         });
+        return $doctors;
     }
 
     public function headings(): array

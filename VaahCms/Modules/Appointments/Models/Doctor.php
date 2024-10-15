@@ -15,6 +15,7 @@ use WebReinvent\VaahCms\Models\User;
 use WebReinvent\VaahCms\Libraries\VaahSeeder;
 use VaahCms\Modules\Appointments\Mails\NotifyUsersOfDoctorsAvailaibiltyMail;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Validator;
 
 class Doctor extends VaahModel
 {
@@ -748,21 +749,78 @@ class Doctor extends VaahModel
         return Excel::download(new DoctorsExport,'doctors.csv');
     }
 
-    public static function importDoctors($fileContents){
-        foreach ($fileContents as $content) {
-            Doctor::updateOrCreate(
-                ['id' => $content['ID']],
-                [
-                    'name' => $content['Name'],
-                    'email' => $content['Email'],
-                    'price' => $content['Price'],
-                    'phone' => $content['Phone'],
-                    'specialization' => $content['Specialization'],
-                    'start_time' => Carbon::parse($content['Start_Time'])->format('Y-m-d H:i:s'),
-                    'end_time' => Carbon::parse($content['End_Time'])->format('Y-m-d H:i:s'),
-                ]
-            );
+    public static function importDoctors($file_contents){
+        $response = [];
+        $validation_error = [];
+        $file_contents = self::normalizeCsvData($file_contents);
+        foreach ($file_contents as $index => $content) {
+            $validator = Validator::make($content, [
+                'ID' => 'required|integer',
+                'Name' => 'required|string|max:255',
+                'Email' => 'required|email|max:255',
+                'Price' => 'required|numeric',
+                'Phone' => 'nullable|string|max:15',
+                'Specialization' => 'required|string|max:255',
+                'Start_Time' => 'required|date_format:Y-m-d H:i:s',
+                'End_Time' => [
+                    'required',
+                    'date_format:Y-m-d H:i:s',
+                    'after:Start_Time',
+                    function ($attribute, $value, $fail) use ($content) {
+                        $startTime = Carbon::parse($content['Start_Time']);
+                        $endTime = Carbon::parse($value);
+
+                        if ($endTime->diffInMinutes($startTime) < 30) {
+                            $fail('The time  slots must be at least 30 minutes apart.');
+                        }
+                    },
+                ],
+            ]);
+
+            if($index < (count($file_contents)-1)){
+                if ($validator->fails()) {
+                    $validation_error[] = [
+                        'record_no' => $index+1,
+                        'errors' => $validator->errors()->all(),
+                    ];
+                    continue;
+                }
+
+                Doctor::updateOrCreate(
+                    ['id' => $content['ID']],
+                    [
+                        'name' => $content['Name'],
+                        'email' => $content['Email'],
+                        'price' => $content['Price'],
+                        'phone' => $content['Phone'],
+                        'specialization' => $content['Specialization'],
+                        'start_time' => Carbon::parse($content['Start_Time'])->format('Y-m-d H:i:s'),
+                        'end_time' => Carbon::parse($content['End_Time'])->format('Y-m-d H:i:s'),
+                    ]
+                );
+            }
         }
-        return response()->json(['message' => 'Doctors updated/created successfully!']);
+        if (!empty($validation_error)) {
+            $response['success'] = false;
+            $response['upload_errors'] = $validation_error;
+        } else {
+            $response['success'] = true;
+        }
+        return $response;
+    }
+
+    public static function normalizeCsvData($content){
+        $reformatted_data = array_map(function($record) {
+            return array_combine(
+                array_map(function($key) {
+                    return trim($key, '"');
+                }, array_keys($record)),
+                array_map(function($value) {
+                    return trim($value, '"');
+                }, $record)
+            );
+        }, $content);
+
+        return $reformatted_data;
     }
 }

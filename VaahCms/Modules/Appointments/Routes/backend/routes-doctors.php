@@ -80,9 +80,6 @@ function () {
 
     //---------------------------------------------------------
 
-    Route::post('/testing/upload',[DoctorsController::class,'bulkUpload'])
-        ->name('vh.backend.appointments.doctors.bulkupload.action');
-
     Route::get('/exportDoctors/list',[DoctorsController::class,'exportDoctors'])
         ->name('vh.backend.appointments.doctors.bulkexport.action');
 
