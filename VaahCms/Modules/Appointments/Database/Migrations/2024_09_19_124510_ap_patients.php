@@ -20,6 +20,7 @@ class ApPatients extends Migration
                 $table->string('name',20)->nullable();
                 $table->string('email',50)->unique()->nullable();
                 $table->unsignedBigInteger('phone')->nullable();
+                $table->boolean('is_active')->default(1)->nullable();
                 $table->timestamps();
                 $table->softDeletes();
             });
