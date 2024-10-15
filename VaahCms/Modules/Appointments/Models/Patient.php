@@ -30,7 +30,8 @@ class Patient extends VaahModel
         'id',
         'name',
         'email',
-        'phone'
+        'phone',
+        'is_active'
     ];
     //-------------------------------------------------
     protected $fill_except = [
@@ -261,7 +262,7 @@ class Patient extends VaahModel
             $rows = $request->rows;
         }
 
-        $list = $list->select(['id','name','email','phone']);
+        $list = $list->select(['id','name','email','phone','is_active']);
         $list = $list->paginate($rows);
 
         $response['success'] = true;
