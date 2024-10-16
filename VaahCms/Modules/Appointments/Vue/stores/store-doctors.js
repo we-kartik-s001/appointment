@@ -77,7 +77,12 @@ export const useDoctorStore = defineStore({
         upload_errors: [],
         show_error_dialog: false,
         csv_actions: [],
-        show_file_upload_dialog: false
+        show_file_upload_dialog: false,
+        csv_records_status: {
+            'total_records': null,
+            'successful_records' : null,
+            'failed_records': null
+        }
     }),
     getters: {
 
@@ -974,7 +979,8 @@ export const useDoctorStore = defineStore({
             await vaah().ajax(
                 this.ajax_url.concat('/importDoctors/list'),
                 (data, res) => {
-                    if(res.data.success){
+                    if(res.data){
+                        this.csv_records_status = res.data;
                         this.getList();
                     }else{
                         this.upload_errors = res.data.upload_errors;

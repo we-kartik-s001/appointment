@@ -230,7 +230,7 @@ const totalRevenueGenerated = computed(() => {
                     </div>
 
                 </template>
-                
+
                 <template #icons>
                     <div class="p-inputgroup">
                     <Button data-testid="doctors-list-create"

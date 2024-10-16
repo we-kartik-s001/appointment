@@ -1,7 +1,7 @@
 <script setup>
 import { vaah } from '../../../vaahvue/pinia/vaah'
 import { useDoctorStore } from '../../../stores/store-doctors'
-import {ref} from "vue";
+import {ref, computed} from "vue";
 import DrawerContent from './DrawerContent.vue';
 const store = useDoctorStore();
 const useVaah = vaah();
@@ -18,6 +18,15 @@ const showAppointmentDetails = (id) => {
 
     <div v-if="store.list">
         <!--table-->
+        <p v-if="store.csv_records_status.total_records">
+            Total Records Processed : {{store.csv_records_status.total_records}}
+        </p>
+        <p v-if="store.csv_records_status.successful_records">
+            Total Successful Records {{store.csv_records_status.successful_records}}
+        </p>
+        <p v-if="store.csv_records_status.failed_records">
+            Total Failed Records {{store.csv_records_status.failed_records}}
+        </p>
          <DataTable :value="store.list.data"
                    dataKey="id"
                    :rowClass="store.setRowClass"

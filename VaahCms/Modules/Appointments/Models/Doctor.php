@@ -751,8 +751,9 @@ class Doctor extends VaahModel
 
     public static function importDoctors($file_contents){
         $response = [];
-        $validation_error = [];
+        $failed_records = 0;
         $file_contents = self::normalizeCsvData($file_contents);
+        $records['processed_records'] = count($file_contents);
         foreach ($file_contents as $index => $content) {
             $validator = Validator::make($content, [
                 'ID' => 'required|integer',
@@ -778,10 +779,7 @@ class Doctor extends VaahModel
             ]);
 
             if ($validator->fails() && $index < (count($file_contents)-1)) {
-                $validation_error[] = [
-                    'record_no' => $index+1,
-                    'errors' => $validator->errors()->all(),
-                ];
+                $failed_records++;
                 continue;
             }
 
@@ -798,12 +796,11 @@ class Doctor extends VaahModel
                 ]
             );
         }
-        if (!empty($validation_error)) {
-            $response['success'] = false;
-            $response['upload_errors'] = $validation_error;
-        } else {
-            $response['success'] = true;
-        }
+        return response()->json([
+            'total_records' => count($file_contents),
+            'failed_records' => $failed_records,
+            'successful_records' => count($file_contents) - $failed_records
+        ]);
         return $response;
     }
 
