@@ -81,8 +81,10 @@ export const useDoctorStore = defineStore({
         csv_records_status: {
             'total_records': null,
             'successful_records' : null,
-            'failed_records': null
-        }
+            'failed_records': null,
+            'reporting_errors': null
+        },
+        show_reporting_log: false
     }),
     getters: {
 
@@ -981,6 +983,7 @@ export const useDoctorStore = defineStore({
                 (data, res) => {
                     if(res.data){
                         this.csv_records_status = res.data;
+                        this.show_reporting_log = true;
                         this.getList();
                     }else{
                         this.upload_errors = res.data.upload_errors;

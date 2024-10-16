@@ -750,58 +750,109 @@ class Doctor extends VaahModel
     }
 
     public static function importDoctors($file_contents){
-        $response = [];
         $failed_records = 0;
         $file_contents = self::normalizeCsvData($file_contents);
-        $records['processed_records'] = count($file_contents);
         foreach ($file_contents as $index => $content) {
-            $validator = Validator::make($content, [
-                'ID' => 'required|integer',
-                'Name' => 'required|string|max:255',
-                'Email' => 'required|email|max:255',
-                'Price' => 'required|numeric',
-                'Phone' => 'nullable|string|max:15',
-                'Specialization' => 'required|string|max:255',
-                'Start_Time' => 'required|date_format:Y-m-d H:i:s',
-                'End_Time' => [
-                    'required',
-                    'date_format:Y-m-d H:i:s',
-                    'after:Start_Time',
-                    function ($attribute, $value, $fail) use ($content) {
-                        $startTime = Carbon::parse($content['Start_Time']);
-                        $endTime = Carbon::parse($value);
+            // Initialize an array to hold validation errors
+            $validationErrors = [];
 
-                        if ($endTime->diffInMinutes($startTime) < 30) {
-                            $fail('The time  slots must be at least 30 minutes apart.');
+            // Iterate over the fields in the content
+            foreach ($content as $field => $value) {
+                switch ($field) {
+                    case 'ID':
+                        if (empty($value) || !is_numeric($value)) {
+                            $validationErrors[] = 'ID is required and must be a number.';
+                            $failed_records++;
                         }
-                    },
-                ],
-            ]);
+                        break;
 
-            if ($validator->fails() && $index < (count($file_contents)-1)) {
-                $failed_records++;
+                    case 'Name':
+                        if (empty($value) || !is_string($value)) {
+                            $validationErrors[] = 'Name is required and must be a string.';
+                            $failed_records++;
+                        }
+                        break;
+
+                    case 'Email':
+                        if (empty($value) || !filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                            $validationErrors[] = 'Email is required and must be a valid email address.';
+                            $failed_records++;
+                        }
+                        break;
+
+                    case 'Price':
+                        if (empty($value) || !is_numeric($value)) {
+                            $validationErrors[] = 'Price is required and must be a number.';
+                            $failed_records++;
+                        }
+                        break;
+
+                    case 'Phone':
+                        if (strlen($value) > 10) {
+                            $validationErrors[] = 'Phone number must not exceed 10 digits.';
+                            $failed_records++;
+                        }
+                        break;
+
+                    case 'Specialization':
+                        if (empty($value)) {
+                            $validationErrors[] = 'Specialization is required.';
+                            $failed_records++;
+                        }
+                        break;
+
+                    case 'Start_Time':
+                        if (!empty($value) && !strtotime($value)) {
+                            $validationErrors[] = 'Start_Time must be a valid date.';
+                            $failed_records++;
+                        }else if(empty($value)){
+                            $validationErrors[] = 'Start Time is required.';
+                            $failed_records++;
+                        }
+                        break;
+
+                    case 'End_Time':
+                        if (!empty($value) && !strtotime($value)) {
+                            $validationErrors[] = 'End_Time must be a valid date.';
+                            $failed_records++;
+                        }else if(empty($value)){
+                            $validationErrors[] = 'End Time is required.';
+                            $failed_records++;
+                        }
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+
+            if (!empty($validationErrors)) {
                 continue;
             }
 
-            Doctor::updateOrCreate(
-                ['id' => $content['ID']],
-                [
-                    'name' => $content['Name'],
-                    'email' => $content['Email'],
-                    'price' => $content['Price'],
-                    'phone' => $content['Phone'],
-                    'specialization' => $content['Specialization'],
-                    'start_time' => Carbon::parse($content['Start_Time'])->format('Y-m-d H:i:s'),
-                    'end_time' => Carbon::parse($content['End_Time'])->format('Y-m-d H:i:s'),
-                ]
+            $dataToInsert = [
+                'id' => $content['ID'],
+                'name' => $content['Name'],
+                'email' => $content['Email'],
+                'price' => $content['Price'],
+                'phone' => $content['Phone'],
+                'specialization' => $content['Specialization'],
+                'start_time' => !empty($content['Start_Time']) ? Carbon::parse($content['Start_Time'])->format('Y-m-d H:i:s') : null,
+                'end_time' => !empty($content['End_Time']) ? Carbon::parse($content['End_Time'])->format('Y-m-d H:i:s') : null,
+            ];
+
+            Doctor::upsert(
+                [$dataToInsert],
+                ['id'],
+                ['name', 'email', 'price', 'phone', 'specialization', 'start_time', 'end_time'] // Update columns
             );
         }
         return response()->json([
             'total_records' => count($file_contents),
             'failed_records' => $failed_records,
-            'successful_records' => count($file_contents) - $failed_records
+            'successful_records' => count($file_contents) - $failed_records,
+            'reporting_errors' => $validationErrors
         ]);
-        return $response;
     }
 
     public static function normalizeCsvData($content){

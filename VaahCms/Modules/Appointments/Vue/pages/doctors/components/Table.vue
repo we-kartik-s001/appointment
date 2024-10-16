@@ -15,9 +15,12 @@ const showAppointmentDetails = (id) => {
 </script>
 
 <template>
-
-    <div v-if="store.list">
-        <!--table-->
+    <Dialog v-if="store.csv_records_status.reporting_errors" v-model:visible="store.show_reporting_log" modal header="Errors" :style="{ width: '50rem' }">
+        The following fields have error in some of the records -
+<!--        <p v-for="(error,index) in store.csv_records_status.reporting_errors" :key="index">-->
+<!--            {{error}}-->
+<!--        </p>-->
+        <br><br>
         <p v-if="store.csv_records_status.total_records">
             Total Records Processed : {{store.csv_records_status.total_records}}
         </p>
@@ -27,6 +30,9 @@ const showAppointmentDetails = (id) => {
         <p v-if="store.csv_records_status.failed_records">
             Total Failed Records {{store.csv_records_status.failed_records}}
         </p>
+    </Dialog>
+    <div v-if="store.list">
+        <!--table-->
          <DataTable :value="store.list.data"
                    dataKey="id"
                    :rowClass="store.setRowClass"
