@@ -121,61 +121,12 @@ const totalRevenueGenerated = computed(() => {
         }, 0);
     }
 });
-
-const fileInput = ref(null);
-
-const openFileDialog = () => {
-    fileInput.value.click();
-};
-
-const handleFileUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const contents = e.target.result;
-            const jsonData = csvToJson(contents);
-            console.log('Parsed JSON data:', jsonData);
-            importDoctors(jsonData);
-        };
-        reader.readAsText(file);
-    }
-};
-
-const csvToJson = (csv) => {
-    const lines = csv.split('\n');
-    const result = [];
-    const headers = lines[0].split(',');
-
-    for (let i = 1; i < lines.length; i++) {
-        const obj = {};
-        const currentLine = lines[i].split(',');
-        for (let j = 0; j < headers.length; j++) {
-            obj[headers[j].trim()] = currentLine[j] ? currentLine[j].trim() : '';
-        }
-        result.push(obj);
-    }
-    return result;
-};
-
-const exportDoctors = () => {
-    store.exportDoctors();
-}
-
-const importDoctors = (jsonData) => {
-    store.importDoctors(jsonData);
-}
-
-watch(() => store.upload_errors,(newVal, oldVal) => {
-    console.log('upload error')
-})
 //-------------------------------------------------------------------------------
 </script>
 <template>
 
     <div class="grid" v-if="store.assets">
         <Sidebar v-model:visible="store.show_error_dialog" position="full">
-<!--            {{store.upload_errors}}-->
             <div v-if="store.upload_errors.length > 0">
                 <table>
                     <thead>
@@ -279,20 +230,7 @@ watch(() => store.upload_errors,(newVal, oldVal) => {
                     </div>
 
                 </template>
-
-                <div class="card">
-                    <Button @click="openFileDialog"
-                            style="background-color: #224e90; color: #fff;"
-                            label="Import CSV"
-                    />
-
-                    <input type="file" ref="fileInput" @change="handleFileUpload" accept=".csv" style="display: none;" />
-                    <Button @click="exportDoctors"
-                            style="margin-left: 5px; background-color: #c46862; color: #fff;"
-                            label="Export CSV"
-                    />
-                </div>
-
+                
                 <template #icons>
                     <div class="p-inputgroup">
                     <Button data-testid="doctors-list-create"

@@ -777,28 +777,26 @@ class Doctor extends VaahModel
                 ],
             ]);
 
-            if($index < (count($file_contents)-1)){
-                if ($validator->fails()) {
-                    $validation_error[] = [
-                        'record_no' => $index+1,
-                        'errors' => $validator->errors()->all(),
-                    ];
-                    continue;
-                }
-
-                Doctor::updateOrCreate(
-                    ['id' => $content['ID']],
-                    [
-                        'name' => $content['Name'],
-                        'email' => $content['Email'],
-                        'price' => $content['Price'],
-                        'phone' => $content['Phone'],
-                        'specialization' => $content['Specialization'],
-                        'start_time' => Carbon::parse($content['Start_Time'])->format('Y-m-d H:i:s'),
-                        'end_time' => Carbon::parse($content['End_Time'])->format('Y-m-d H:i:s'),
-                    ]
-                );
+            if ($validator->fails() && $index < (count($file_contents)-1)) {
+                $validation_error[] = [
+                    'record_no' => $index+1,
+                    'errors' => $validator->errors()->all(),
+                ];
+                continue;
             }
+
+            Doctor::updateOrCreate(
+                ['id' => $content['ID']],
+                [
+                    'name' => $content['Name'],
+                    'email' => $content['Email'],
+                    'price' => $content['Price'],
+                    'phone' => $content['Phone'],
+                    'specialization' => $content['Specialization'],
+                    'start_time' => Carbon::parse($content['Start_Time'])->format('Y-m-d H:i:s'),
+                    'end_time' => Carbon::parse($content['End_Time'])->format('Y-m-d H:i:s'),
+                ]
+            );
         }
         if (!empty($validation_error)) {
             $response['success'] = false;

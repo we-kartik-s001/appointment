@@ -1,8 +1,11 @@
 <?php namespace VaahCms\Modules\Appointments\Http\Controllers\Backend;
 
+use App\Exports\AppointmentsExport;
+use App\Exports\DoctorsExport;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 use VaahCms\Modules\Appointments\Models\Appointment;
 use VaahCms\Modules\Appointments\Models\Patient;
 use VaahCms\Modules\Appointments\Models\Doctor;
@@ -232,5 +235,11 @@ class AppointmentsController extends Controller
     }
     //----------------------------------------------------------
 
+    public function exportAppointments(){
+        return Excel::download(new AppointmentsExport,'appointments.csv');
+    }
 
+    public function importAppointments(){
+
+    }
 }

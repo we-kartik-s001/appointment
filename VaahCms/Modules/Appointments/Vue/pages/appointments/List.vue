@@ -60,6 +60,49 @@ const toggleCreateMenu = (event) => {
 };
 //--------/form_menu
 
+const fileInput = ref(null);
+
+const openFileDialog = () => {
+    fileInput.value.click();
+};
+
+const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const contents = e.target.result;
+            const jsonData = csvToJson(contents);
+            console.log('Parsed JSON data:', jsonData);
+            importAppointments(jsonData);
+        };
+        reader.readAsText(file);
+    }
+};
+
+const csvToJson = (csv) => {
+    const lines = csv.split('\n');
+    const result = [];
+    const headers = lines[0].split(',');
+
+    for (let i = 1; i < lines.length; i++) {
+        const obj = {};
+        const currentLine = lines[i].split(',');
+        for (let j = 0; j < headers.length; j++) {
+            obj[headers[j].trim()] = currentLine[j] ? currentLine[j].trim() : '';
+        }
+        result.push(obj);
+    }
+    return result;
+};
+
+const exportAppointments = () => {
+    store.exportAppointments();
+}
+
+const importAppointments = (jsonData) => {
+    store.exportAppointments(jsonData);
+}
 
 </script>
 <template>
@@ -82,6 +125,19 @@ const toggleCreateMenu = (event) => {
                     </div>
 
                 </template>
+
+                <div class="card">
+                    <Button @click="openFileDialog"
+                            style="background-color: #224e90; color: #fff;"
+                            label="Import CSV"
+                    />
+
+                    <input type="file" ref="fileInput" @change="handleFileUpload" accept=".csv" style="display: none;" />
+                    <Button @click="exportAppointments"
+                            style="margin-left: 5px; background-color: #c46862; color: #fff;"
+                            label="Export CSV"
+                    />
+                </div>
 
                 <template #icons>
 
