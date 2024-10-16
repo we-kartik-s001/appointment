@@ -24,6 +24,7 @@ class ApDoctors extends Migration
                 $table->string('specialization',50)->nullable();
                 $table->dateTime('start_time')->nullable();
                 $table->dateTime('end_time')->nullable();
+                $table->boolean('is_active')->default(1)->nullable();
                 $table->timestamps();
                 $table->softDeletes();
             });

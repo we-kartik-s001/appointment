@@ -37,6 +37,7 @@ class Doctor extends VaahModel
         'specialization',
         'start_time',
         'end_time',
+        'is_active'
     ];
     //-------------------------------------------------
     protected $fill_except = [
@@ -300,7 +301,7 @@ class Doctor extends VaahModel
             $rows = $request->rows;
         }
 
-        $list = $list->select(['id','name','email','phone','specialization','start_time','end_time','price'])
+        $list = $list->select(['id','name','email','phone','specialization','start_time','end_time','price','is_active'])
                      ->with('appointments.patient')
                     ->withCount(['appointments as active_appointments_count' => function ($query) {
                         $query->where('status', 1);
