@@ -1,7 +1,5 @@
 <?php namespace VaahCms\Modules\Appointments\Http\Controllers\Backend;
 
-use App\Exports\AppointmentsExport;
-use App\Exports\DoctorsExport;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -236,10 +234,38 @@ class AppointmentsController extends Controller
     //----------------------------------------------------------
 
     public function exportAppointments(){
-        return Excel::download(new AppointmentsExport,'appointments.csv');
+        try{
+            return Appointment::exportAppointments();
+        }catch (\Exception $e){
+            $response = [];
+            $response['success'] = false;
+            if(env('APP_DEBUG')){
+                $response['errors'][] = $e->getMessage();
+                $response['hint'] = $e->getTrace();
+            } else{
+                $response['errors'][] = trans("vaahcms-general.something_went_wrong");
+            }
+            return $response;
+        }
     }
 
-    public function importAppointments(){
-
+    public function importAppointments(Request $request){
+        $fileContents = $request->json()->all();
+        if(!$fileContents){
+            return ;
+        }
+        try{
+            return Appointment::importAppointments($fileContents);
+        }catch (\Exception $e){
+            $response = [];
+            $response['success'] = false;
+            if(env('APP_DEBUG')){
+                $response['errors'][] = $e->getMessage();
+                $response['hint'] = $e->getTrace();
+            } else{
+                $response['errors'][] = trans("vaahcms-general.something_went_wrong");
+            }
+            return $response;
+        }
     }
 }

@@ -1,6 +1,7 @@
 <?php namespace VaahCms\Modules\Appointments\Models;
 
 use App\Exports\DoctorsExport;
+use App\Jobs\ProcessBulkRecords;
 use Carbon\Carbon;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -645,21 +646,7 @@ class Doctor extends VaahModel
     //-------------------------------------------------
     public static function seedSampleItems($records=100)
     {
-
-        $i = 0;
-
-        while($i < $records)
-        {
-            $inputs = self::fillItem(false);
-
-            $item =  new self();
-            $item->fill($inputs);
-            $item->save();
-
-            $i++;
-
-        }
-
+        ProcessBulkRecords::dispatch($records);
     }
 
 
@@ -753,19 +740,9 @@ class Doctor extends VaahModel
         $failed_records = 0;
         $file_contents = self::normalizeCsvData($file_contents);
         foreach ($file_contents as $index => $content) {
-            // Initialize an array to hold validation errors
             $validationErrors = [];
-
-            // Iterate over the fields in the content
             foreach ($content as $field => $value) {
                 switch ($field) {
-                    case 'ID':
-                        if (empty($value) || !is_numeric($value)) {
-                            $validationErrors[] = 'ID is required and must be a number.';
-                            $failed_records++;
-                        }
-                        break;
-
                     case 'Name':
                         if (empty($value) || !is_string($value)) {
                             $validationErrors[] = 'Name is required and must be a string.';
@@ -831,7 +808,6 @@ class Doctor extends VaahModel
             }
 
             $dataToInsert = [
-                'id' => $content['ID'],
                 'name' => $content['Name'],
                 'email' => $content['Email'],
                 'price' => $content['Price'],
@@ -843,7 +819,7 @@ class Doctor extends VaahModel
 
             Doctor::upsert(
                 [$dataToInsert],
-                ['id'],
+                ['email'],
                 ['name', 'email', 'price', 'phone', 'specialization', 'start_time', 'end_time'] // Update columns
             );
         }

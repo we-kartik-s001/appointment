@@ -1,5 +1,6 @@
 <?php namespace VaahCms\Modules\Appointments\Models;
 
+use App\Exports\AppointmentsExport;
 use App\Mail\NotifyDoctorsOfCancelledAppointments;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -7,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Faker\Factory;
+use Maatwebsite\Excel\Facades\Excel;
 use VaahCms\Modules\Appointments\Mails\NotifyDoctorssOfAppointmentCancellationMail;
 use WebReinvent\VaahCms\Libraries\VaahMail;
 use WebReinvent\VaahCms\Models\VaahModel;
@@ -692,4 +694,117 @@ class Appointment extends VaahModel
         return Carbon::parse($time)->timezone('Asia/Kolkata');
     }
 
+    public static function exportAppointments(){
+        return Excel::download(new AppointmentsExport,'appointments.csv');
+    }
+
+    public static function importAppointments($file_contents){
+        $failed_records = 0;
+        $file_contents = self::normalizeCsvData($file_contents);
+        foreach ($file_contents as $index => $content) {
+            $validationErrors = [];
+            foreach ($content as $field => $value) {
+                switch ($field) {
+                    case 'Name':
+                        if (empty($value) || !is_string($value)) {
+                            $validationErrors[] = 'Name is required and must be a string.';
+                            $failed_records++;
+                        }
+                        break;
+
+                    case 'Email':
+                        if (empty($value) || !filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                            $validationErrors[] = 'Email is required and must be a valid email address.';
+                            $failed_records++;
+                        }
+                        break;
+
+                    case 'Price':
+                        if (empty($value) || !is_numeric($value)) {
+                            $validationErrors[] = 'Price is required and must be a number.';
+                            $failed_records++;
+                        }
+                        break;
+
+                    case 'Phone':
+                        if (strlen($value) > 10) {
+                            $validationErrors[] = 'Phone number must not exceed 10 digits.';
+                            $failed_records++;
+                        }
+                        break;
+
+                    case 'Specialization':
+                        if (empty($value)) {
+                            $validationErrors[] = 'Specialization is required.';
+                            $failed_records++;
+                        }
+                        break;
+
+                    case 'Start_Time':
+                        if (!empty($value) && !strtotime($value)) {
+                            $validationErrors[] = 'Start_Time must be a valid date.';
+                            $failed_records++;
+                        }else if(empty($value)){
+                            $validationErrors[] = 'Start Time is required.';
+                            $failed_records++;
+                        }
+                        break;
+
+                    case 'End_Time':
+                        if (!empty($value) && !strtotime($value)) {
+                            $validationErrors[] = 'End_Time must be a valid date.';
+                            $failed_records++;
+                        }else if(empty($value)){
+                            $validationErrors[] = 'End Time is required.';
+                            $failed_records++;
+                        }
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+
+            if (!empty($validationErrors)) {
+                continue;
+            }
+
+            $dataToInsert = [
+                'name' => $content['Name'],
+                'email' => $content['Email'],
+                'price' => $content['Price'],
+                'phone' => $content['Phone'],
+                'specialization' => $content['Specialization'],
+                'start_time' => !empty($content['Start_Time']) ? Carbon::parse($content['Start_Time'])->format('Y-m-d H:i:s') : null,
+                'end_time' => !empty($content['End_Time']) ? Carbon::parse($content['End_Time'])->format('Y-m-d H:i:s') : null,
+            ];
+
+            Doctor::upsert(
+                [$dataToInsert],
+                ['email'],
+                ['name', 'email', 'price', 'phone', 'specialization', 'start_time', 'end_time'] // Update columns
+            );
+        }
+        return response()->json([
+            'total_records' => count($file_contents),
+            'failed_records' => $failed_records,
+            'successful_records' => count($file_contents) - $failed_records,
+            'reporting_errors' => $validationErrors
+        ]);
+    }
+
+    public static function normalizeCsvData($content){
+        $reformatted_data = array_map(function($record) {
+            return array_combine(
+                array_map(function($key) {
+                    return trim($key, '"');
+                }, array_keys($record)),
+                array_map(function($value) {
+                    return trim($value, '"');
+                }, $record)
+            );
+        }, $content);
+
+        return $reformatted_data;
+    }
 }

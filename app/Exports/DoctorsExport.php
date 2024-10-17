@@ -16,7 +16,6 @@ class DoctorsExport implements FromCollection, WithHeadings
     {
         $doctors = Doctor::all()->map(function ($doctor) {
             return [
-                'ID' => $doctor->id,
                 'Name' => $doctor->name,
                 'Email' => $doctor->email,
                 'Price' => $doctor->price,
@@ -34,7 +33,6 @@ class DoctorsExport implements FromCollection, WithHeadings
     public function headings(): array
     {
         return [
-            'ID',
             'Name',
             'Email',
             'Price',

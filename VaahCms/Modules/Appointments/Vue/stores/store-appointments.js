@@ -65,7 +65,17 @@ export const useAppointmentStore = defineStore({
         list_create_menu: [],
         item_menu_list: [],
         item_menu_state: null,
-        form_menu_list: []
+        form_menu_list: [],
+        show_error_dialog: false,
+        csv_actions: [],
+        show_file_upload_dialog: false,
+        csv_records_status: {
+            'total_records': null,
+            'successful_records' : null,
+            'failed_records': null,
+            'reporting_errors': null
+        },
+        show_reporting_log: false
     }),
     getters: {
 
@@ -931,27 +941,44 @@ export const useAppointmentStore = defineStore({
 
         },
         //---------------------------------------------------------------------
-        async exportAppointments(){
-            let file_data = null;
-            try {
-                await vaah().ajax(
-                    this.ajax_url.concat('/exportAppointments/list'),
-                    (data, res) => {
-                        file_data = res.data;
+
+        getCsvActions()
+        {
+            this.csv_actions = [
+                {
+                    label: 'Import CSV',
+                    icon: 'pi pi-upload',
+                    command: () => {
+                        this.show_file_upload_dialog = !this.show_file_upload_dialog
                     }
-                );
-                const blob = new Blob([file_data]);
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.setAttribute('download', 'appointments.csv');
-                document.body.appendChild(link);
-                link.click();
-                link.remove();
-                window.URL.revokeObjectURL(url);
-            } catch (error) {
-                console.error('Error downloading file:', error);
-            }
+                },
+                {
+                    label: 'Export CSV',
+                    icon: 'pi pi-download',
+                    command: async () => {
+                            let file_data = null;
+                            try {
+                                await vaah().ajax(
+                                    this.ajax_url.concat('/exportAppointments/list'),
+                                    (data, res) => {
+                                        file_data = res.data;
+                                    }
+                                );
+                                const blob = new Blob([file_data]);
+                                const url = window.URL.createObjectURL(blob);
+                                const link = document.createElement('a');
+                                link.href = url;
+                                link.setAttribute('download', 'appointments.csv');
+                                document.body.appendChild(link);
+                                link.click();
+                                link.remove();
+                                window.URL.revokeObjectURL(url);
+                            } catch (error) {
+                                console.error('Error downloading file:', error);
+                            }
+                    }
+                },
+            ];
         },
 
         async importAppointments(fileData){
