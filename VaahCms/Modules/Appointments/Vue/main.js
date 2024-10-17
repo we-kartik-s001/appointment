@@ -18,6 +18,7 @@ import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
 import Chart from "primevue/chart";
 import Card from "primevue/card";
+import FileUpload from "primevue/fileupload";
 //-------------/PrimeVue Imports
 
 //-------------CRUD PrimeVue Imports
@@ -79,6 +80,7 @@ app.component('Menu', Menu);
 app.component('ProgressBar', ProgressBar);
 app.component('Toast', Toast);
 app.component('Chart',Chart);
+app.component('FileUpload',FileUpload);
 //-------------/PrimeVue Use
 
 // -------------CRUD PrimeVue Use

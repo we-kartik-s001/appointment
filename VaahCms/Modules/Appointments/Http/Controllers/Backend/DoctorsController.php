@@ -1,5 +1,6 @@
 <?php namespace VaahCms\Modules\Appointments\Http\Controllers\Backend;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use VaahCms\Modules\Appointments\Models\Doctor;
@@ -236,6 +237,42 @@ class DoctorsController extends Controller
     public function getSpecialization(){
         try{
             return Doctor::getSpecialization();
+        }catch (\Exception $e){
+            $response = [];
+            $response['success'] = false;
+            if(env('APP_DEBUG')){
+                $response['errors'][] = $e->getMessage();
+                $response['hint'] = $e->getTrace();
+            } else{
+                $response['errors'][] = trans("vaahcms-general.something_went_wrong");
+            }
+            return $response;
+        }
+    }
+
+    public function importDoctors(Request $request){
+        $fileContents = $request->json()->all();
+        if(!$fileContents){
+            return ;
+        }
+        try{
+            return Doctor::importDoctors($fileContents);
+        }catch (\Exception $e){
+            $response = [];
+            $response['success'] = false;
+            if(env('APP_DEBUG')){
+                $response['errors'][] = $e->getMessage();
+                $response['hint'] = $e->getTrace();
+            } else{
+                $response['errors'][] = trans("vaahcms-general.something_went_wrong");
+            }
+            return $response;
+        }
+    }
+
+    public function exportDoctors(){
+        try{
+            return Doctor::exportDoctors();
         }catch (\Exception $e){
             $response = [];
             $response['success'] = false;

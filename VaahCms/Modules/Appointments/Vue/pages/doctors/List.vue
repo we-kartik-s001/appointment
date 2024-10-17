@@ -1,5 +1,5 @@
 <script setup>
-import {computed, onMounted, ref} from "vue";
+import {computed, onMounted, ref, watch} from "vue";
 import {useRoute} from 'vue-router';
 
 import {useDoctorStore} from '../../stores/store-doctors'
@@ -126,6 +126,28 @@ const totalRevenueGenerated = computed(() => {
 <template>
 
     <div class="grid" v-if="store.assets">
+        <Sidebar v-model:visible="store.show_error_dialog" position="full">
+            <div v-if="store.upload_errors.length > 0">
+                <table>
+                    <thead>
+                    <tr>
+                        <td>Line No</td>
+                        <td>Erros</td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(error,index) in store.upload_errors" :key="index">
+                            <td>{{error.record_no}}</td>
+                            <td>
+                                <p v-for="(err,index) in error.errors" :key="index">
+                                    {{err}}
+                                </p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </Sidebar>
             <Sidebar v-model:visible="visible" header="" position="right">
                 <template #header>
 <!--                    <div style="display: flex; justify-content: space-between; align-items: center;">-->
@@ -140,13 +162,13 @@ const totalRevenueGenerated = computed(() => {
                 <div v-if="store.list.data.length > 0" class="card flex justify-content-center">
                     <Chart type="pie" :data="chartData" :options="chartOptions" class="w-full md:w-30rem"/>
                 </div>
-                
+
                 <div v-else>
                     <span>No Record Found</span>
                 </div>
             </Sidebar>
 
-        <div v-if="store.list.data" class="stat-block" style="display: flex; justify-content: center; align-items: center; height: 100%;    ">
+        <div v-if="store.list.data.length > 0" class="stat-block" style="display: flex; justify-content: center; align-items: center; height: 100%;    ">
             <Card style="width: 20rem; height: 10rem;margin-left: 10px; overflow: hidden">
                 <template #title>
                     <span style="font-weight: bold; font-size: 20px;">Total Appointments</span>
@@ -187,12 +209,11 @@ const totalRevenueGenerated = computed(() => {
                     icon="pi pi-arrow-right"
                     @click="visible = true"
                     style="margin-left: 20px;"
+                    severity="success"
+                    rounded
             />
         </div>
 
-<!--        <div class="card flex justify-content-center" style="margin: auto;width: 100%; height: 200px;">-->
-<!--            <Chart v-if="chartData && chartOptions" type="doughnut" :data="chartData" :options="chartOptions" class="w-full md:w-30rem" />-->
-<!--        </div>-->
         <div :class="'col-'+(store.show_filters?9:store.list_view_width)">
             <Panel class="is-small">
 
@@ -211,9 +232,7 @@ const totalRevenueGenerated = computed(() => {
                 </template>
 
                 <template #icons>
-
                     <div class="p-inputgroup">
-
                     <Button data-testid="doctors-list-create"
                             class="p-button-sm"
                             @click="store.toForm()">

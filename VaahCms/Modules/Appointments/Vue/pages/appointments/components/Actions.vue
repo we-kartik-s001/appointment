@@ -10,6 +10,7 @@ const route = useRoute();
 onMounted(async () => {
     store.getListSelectedMenu();
     store.getListBulkMenu();
+    store.getCsvActions();
 });
 
 //--------selected_menu_state
@@ -25,6 +26,56 @@ const toggleBulkMenuState = (event) => {
     bulk_menu_state.value.toggle(event);
 };
 //--------/bulk_menu_state
+
+//--------csv_actions_state
+const csv_actions_state = ref();
+const toggleCsvMenuState = (event) => {
+    csv_actions_state.value.toggle(event);
+};
+//--------csv_actions_state
+
+const fileInput = ref(null);
+
+const openFileDialog = () => {
+    fileInput.value.click();
+};
+
+const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const contents = e.target.result;
+            const jsonData = csvToJson(contents);
+            importAppointments(jsonData);
+        };
+        reader.readAsText(file);
+    }
+};
+
+const csvToJson = (csv) => {
+    const lines = csv.split('\n');
+    const result = [];
+    const headers = lines[0].split(',');
+
+    for (let i = 1; i < lines.length; i++) {
+        const obj = {};
+        const currentLine = lines[i].split(',');
+        for (let j = 0; j < headers.length; j++) {
+            obj[headers[j].trim()] = currentLine[j] ? currentLine[j].trim() : '';
+        }
+        result.push(obj);
+    }
+    return result;
+};
+
+const importAppointments = (jsonData) => {
+    store.importAppointments(jsonData);
+}
+
+watch(() => store.show_file_upload_dialog, (newVal) => {
+    fileInput.value.click();
+});
 </script>
 
 <template>
@@ -51,6 +102,24 @@ const toggleBulkMenuState = (event) => {
                       :model="store.list_selected_menu"
                       :popup="true" />
                 <!--/selected_menu-->
+
+                <!-- toggle button for import export -->
+                <Button
+                    type="button"
+                    @click="toggleCsvMenuState"
+                    data-testid="doctors-actions-bulk-menu"
+                    aria-haspopup="true"
+                    aria-controls="csv_actions"
+                    class="ml-1 p-button-sm">
+                    <i class="pi pi-ellipsis-v"></i>
+                </Button>
+                <Menu ref="csv_actions_state"
+                      :model="store.csv_actions"
+                      :popup="true" />
+
+                <input type="file" ref="fileInput" @change="handleFileUpload" accept=".csv" style="display: none;" />
+
+                <!-- toggle button for import export -->
 
             </div>
             <!--/left-->
