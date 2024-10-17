@@ -701,61 +701,42 @@ class Appointment extends VaahModel
     public static function importAppointments($file_contents){
         $failed_records = 0;
         $file_contents = self::normalizeCsvData($file_contents);
+        $validationErrors = [];
+
         foreach ($file_contents as $index => $content) {
-            $validationErrors = [];
+            $check_doctor = Doctor::where('email', $content['Doctor_Email'])->pluck('id')->first();
+            $check_patient = Patient::where('email',$content['Patient_Email'])->pluck('id')->first();
+            if(!$check_doctor && strlen($content['Doctor_Email'])){
+                $validationErrors[] = 'Doctor with '. $content['Doctor_Email'].' doesn\'t exists';
+                $failed_records++;
+            }
+            if(!$check_patient && strlen($content['Patient_Email'])){
+                $validationErrors[] = 'Patient with '. $content['Patient_Email'].' doesn\'t exists';
+                $failed_records++;
+            }
+
             foreach ($content as $field => $value) {
                 switch ($field) {
-                    case 'Name':
-                        if (empty($value) || !is_string($value)) {
-                            $validationErrors[] = 'Name is required and must be a string.';
-                            $failed_records++;
-                        }
-                        break;
-
-                    case 'Email':
+                    case 'Patient_Email':
                         if (empty($value) || !filter_var($value, FILTER_VALIDATE_EMAIL)) {
-                            $validationErrors[] = 'Email is required and must be a valid email address.';
+                            $validationErrors[] = 'Patient email is required and must be a string.';
                             $failed_records++;
                         }
                         break;
 
-                    case 'Price':
-                        if (empty($value) || !is_numeric($value)) {
-                            $validationErrors[] = 'Price is required and must be a number.';
+                    case 'Doctor_Email':
+                        if (empty($value) || !filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                            $validationErrors[] = 'Doctor email is required and must be a valid email address.';
                             $failed_records++;
                         }
                         break;
 
-                    case 'Phone':
-                        if (strlen($value) > 10) {
-                            $validationErrors[] = 'Phone number must not exceed 10 digits.';
-                            $failed_records++;
-                        }
-                        break;
-
-                    case 'Specialization':
-                        if (empty($value)) {
-                            $validationErrors[] = 'Specialization is required.';
-                            $failed_records++;
-                        }
-                        break;
-
-                    case 'Start_Time':
+                    case 'Start_Date':
                         if (!empty($value) && !strtotime($value)) {
                             $validationErrors[] = 'Start_Time must be a valid date.';
                             $failed_records++;
                         }else if(empty($value)){
                             $validationErrors[] = 'Start Time is required.';
-                            $failed_records++;
-                        }
-                        break;
-
-                    case 'End_Time':
-                        if (!empty($value) && !strtotime($value)) {
-                            $validationErrors[] = 'End_Time must be a valid date.';
-                            $failed_records++;
-                        }else if(empty($value)){
-                            $validationErrors[] = 'End Time is required.';
                             $failed_records++;
                         }
                         break;
@@ -770,20 +751,20 @@ class Appointment extends VaahModel
             }
 
             $dataToInsert = [
-                'name' => $content['Name'],
-                'email' => $content['Email'],
-                'price' => $content['Price'],
-                'phone' => $content['Phone'],
-                'specialization' => $content['Specialization'],
-                'start_time' => !empty($content['Start_Time']) ? Carbon::parse($content['Start_Time'])->format('Y-m-d H:i:s') : null,
-                'end_time' => !empty($content['End_Time']) ? Carbon::parse($content['End_Time'])->format('Y-m-d H:i:s') : null,
+                'doctor_id' => $check_doctor,
+                'patient_id' => $check_patient,
+                'status' => 1,
+                'date_time' => !empty($content['Start_Date']) ? Carbon::parse($content['Start_Date'])->format('Y-m-d H:i:s') : null,
             ];
 
-            Doctor::upsert(
-                [$dataToInsert],
-                ['email'],
-                ['name', 'email', 'price', 'phone', 'specialization', 'start_time', 'end_time'] // Update columns
-            );
+            if(!$content['End_Date']){
+                $app = new Appointment();
+                $app->doctor_id = $check_doctor;
+                $app->patient_id = $check_patient;
+                $app->date_time = !empty($content['Start_Date']) ? Carbon::parse($content['Start_Date'])->format('Y-m-d H:i:s') : null;
+                $app->status = 1;
+                $app->save();
+            }
         }
         return response()->json([
             'total_records' => count($file_contents),
