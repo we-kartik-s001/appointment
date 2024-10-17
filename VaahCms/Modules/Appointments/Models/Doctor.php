@@ -653,6 +653,19 @@ class Doctor extends VaahModel
     //-------------------------------------------------
     public static function fillItem($is_response_return = true)
     {
+        $specializations = [
+            'Cardiology',
+            'Dermatology',
+            'Neurology',
+            'Pediatrics',
+            'Psychiatry',
+            'Radiology',
+            'Orthopedics',
+            'Ophthalmology',
+            'Gastroenterology',
+            'Oncology'
+        ];
+
         $request = new Request([
             'model_namespace' => self::class,
             'except' => self::getUnFillableColumns()
@@ -686,9 +699,9 @@ class Doctor extends VaahModel
                         if($field === 'name'){
                             $inputs[$field] = $faker->text(10);
                         }elseif ($field === 'specialization'){
-                            $inputs[$field] = 'Medicine';
+                            $inputs[$field] = $specializations[rand(0,9)];
                         }elseif($field === 'email'){
-                            $inputs[$field] = $faker->email(60);
+                            $inputs[$field] = $faker->unique()->safeEmail;
                         }
                         break;
 
