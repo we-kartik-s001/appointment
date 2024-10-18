@@ -75,7 +75,11 @@ export const useAppointmentStore = defineStore({
             'failed_records': null,
             'reporting_errors': null
         },
-        show_reporting_log: false
+        show_reporting_log: false,
+        steps: [],
+        active_index: 0,
+        csv_headers: [],
+        list_database_mappers: []
     }),
     getters: {
 
@@ -982,22 +986,70 @@ export const useAppointmentStore = defineStore({
         },
 
         async importAppointments(fileData){
+            ajax_url = ajax_url+'/importAppointments/list';
+            this.options = {
+                params: fileData,
+                method: 'post',
+                headers: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
             await vaah().ajax(
-                this.ajax_url.concat('/importAppointments/list'),
-                (data, res) => {
-                    if(res.data.success){
-                        this.getList();
-                    }else{
-                        this.upload_errors = res.data.upload_errors;
-                        this.show_error_dialog = true
-                    }
+                this.ajax_url,
+                this.afterImportAppointments,
+                this.options
+            );
+        },
+
+        afterImportAppointments(data, res){
+            if(res.data.success){
+                console.log('checking import',res);
+                this.getList();
+            }else{
+                this.upload_errors = res.data.upload_errors;
+                this.show_error_dialog = true
+            }
+        },
+        listCsvImportSteps(){
+            this.steps = [
+                {
+                    label: 'Upload CSV',
+                    pageIndex: 0,
                 },
                 {
-                    params: fileData,
-                    method: 'post',
-                    headers: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
-            );
+                    label: 'Map Data',
+                    pageIndex: 1,
+                },
+                {
+                    label: 'Finish Upload',
+                    pageIndex: 2,
+                },
+            ]
+        },
+        nextImportStep(){
+            if(this.active_index != 2){
+                this.active_index += 1;
+            }
+        },
+        previousImportStep(){
+            if(this.active_index != 0) {
+                this.active_index -= 1;
+            }
+        },
+        getUploadedCsvHeaders(fileData){
+            this.csv_headers = this.normalizeCsvHeaders(Object.keys(fileData[0]));
+        },
+        normalizeCsvHeaders(headers){
+            return headers.map(item => item.replace(/"/g, ''));
+        },
+        listDatabaseMappers(){
+            this.list_database_mappers = [
+                'Patient Name',
+                'Patient Email',
+                'Doctor Name',
+                'Doctor Email',
+                'Doctor Specialization',
+                'Start Date',
+                'End Date'
+            ]
         }
     }
 });
