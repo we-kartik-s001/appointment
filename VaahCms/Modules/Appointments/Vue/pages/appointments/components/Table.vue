@@ -1,15 +1,21 @@
 <script setup>
 import { vaah } from '../../../vaahvue/pinia/vaah'
 import { useAppointmentStore } from '../../../stores/store-appointments'
+import {onMounted, ref} from "vue";
 import {addMinutes} from 'date-fns';
 import { useToast } from "primevue/usetoast";
 import { useConfirm } from "primevue/useconfirm";
-
+import ImportCsvDialog from "./ImportCsvDialog.vue";
 const confirm = useConfirm();
 const toast = useToast();
 
 const store = useAppointmentStore();
 const useVaah = vaah();
+const csv_import_dialog = ref();
+
+onMounted(() => {
+    store.listCsvImportSteps();
+})
 
 const deleteAppointment = (action,data) => {
     confirm.require({
@@ -53,9 +59,26 @@ const cancelAppointment = (action,data) => {
         }
     });
 };
+
+const onSidebarHide = () => {
+    store.show_file_upload_dialog = false;
+}
 </script>
 
 <template>
+    <Sidebar v-model:visible="store.show_file_upload_dialog"
+             position="full"
+             ref="csv_import_dialog"
+             @hide="onSidebarHide"
+    >
+        <Steps :model="store.steps"
+               aria-label="Form Steps"
+               class="steps-custom mb-5"
+               v-model:activeStep="store.active_index"
+        />
+        <ImportCsvDialog :activeindex="store.active_index"/>
+    </Sidebar>
+
     <div v-if="store.list">
         <!--table-->
          <DataTable :value="store.list.data"
