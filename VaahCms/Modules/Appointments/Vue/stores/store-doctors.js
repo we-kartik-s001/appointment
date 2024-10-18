@@ -73,7 +73,18 @@ export const useDoctorStore = defineStore({
         item_menu_list: [],
         item_menu_state: null,
         form_menu_list: [],
-        specializations: null
+        specializations: null,
+        upload_errors: [],
+        show_error_dialog: false,
+        csv_actions: [],
+        show_file_upload_dialog: false,
+        csv_records_status: {
+            'total_records': null,
+            'successful_records' : null,
+            'failed_records': null,
+            'reporting_errors': null
+        },
+        show_reporting_log: false
     }),
     getters: {
 
@@ -965,7 +976,65 @@ export const useDoctorStore = defineStore({
                     this.specializations = res.data;
                 }
             );
-        }
+        },
+        async importDoctors(fileData){
+            await vaah().ajax(
+                this.ajax_url.concat('/importDoctors/list'),
+                (data, res) => {
+                    if(res.data){
+                        this.csv_records_status = res.data;
+                        this.show_reporting_log = true;
+                        this.getList();
+                    }else{
+                        this.upload_errors = res.data.upload_errors;
+                        this.show_error_dialog = true
+                    }
+                },
+                {
+                    params: fileData,
+                    method: 'post',
+                    headers: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            );
+        },
+        getCsvActions()
+        {
+            this.csv_actions = [
+                {
+                    label: 'Import CSV',
+                    icon: 'pi pi-upload',
+                    command: () => {
+                        this.show_file_upload_dialog = !this.show_file_upload_dialog
+                    }
+                },
+                {
+                    label: 'Export CSV',
+                    icon: 'pi pi-download',
+                    command: async () => {
+                        let file_data = null;
+                        try {
+                            await vaah().ajax(
+                                this.ajax_url.concat('/exportDoctors/list'),
+                                (data, res) => {
+                                    file_data = res.data;
+                                }
+                            );
+                            const blob = new Blob([file_data]);
+                            const url = window.URL.createObjectURL(blob);
+                            const link = document.createElement('a');
+                            link.href = url;
+                            link.setAttribute('download', 'doctors.csv');
+                            document.body.appendChild(link);
+                            link.click();
+                            link.remove();
+                            window.URL.revokeObjectURL(url);
+                        } catch (error) {
+                            console.error('Error downloading file:', error);
+                        }
+                    }
+                },
+            ];
+        },
     }
 });
 

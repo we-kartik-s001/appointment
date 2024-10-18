@@ -79,4 +79,9 @@ function () {
         ->name('vh.backend.appointments.doctors.item.action');
 
     //---------------------------------------------------------
+
+    Route::get('/exportDoctors/list',[DoctorsController::class,'exportDoctors'])
+        ->name('vh.backend.appointments.doctors.bulkexport.action');
+
+    Route::post('/importDoctors/list',[DoctorsController::class,'importDoctors']);
 });

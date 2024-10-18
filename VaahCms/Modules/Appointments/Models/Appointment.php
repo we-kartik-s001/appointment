@@ -1,5 +1,6 @@
 <?php namespace VaahCms\Modules\Appointments\Models;
 
+use App\Exports\AppointmentsExport;
 use App\Mail\NotifyDoctorsOfCancelledAppointments;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -7,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Faker\Factory;
+use Maatwebsite\Excel\Facades\Excel;
 use VaahCms\Modules\Appointments\Mails\NotifyDoctorssOfAppointmentCancellationMail;
 use WebReinvent\VaahCms\Libraries\VaahMail;
 use WebReinvent\VaahCms\Models\VaahModel;
@@ -692,4 +694,98 @@ class Appointment extends VaahModel
         return Carbon::parse($time)->timezone('Asia/Kolkata');
     }
 
+    public static function exportAppointments(){
+        return Excel::download(new AppointmentsExport,'appointments.csv');
+    }
+
+    public static function importAppointments($file_contents){
+        $failed_records = 0;
+        $file_contents = self::normalizeCsvData($file_contents);
+        $validationErrors = [];
+
+        foreach ($file_contents as $index => $content) {
+            $check_doctor = Doctor::where('email', $content['Doctor_Email'])->pluck('id')->first();
+            $check_patient = Patient::where('email',$content['Patient_Email'])->pluck('id')->first();
+            if(!$check_doctor && strlen($content['Doctor_Email'])){
+                $validationErrors[] = 'Doctor with '. $content['Doctor_Email'].' doesn\'t exists';
+                $failed_records++;
+            }
+            if(!$check_patient && strlen($content['Patient_Email'])){
+                $validationErrors[] = 'Patient with '. $content['Patient_Email'].' doesn\'t exists';
+                $failed_records++;
+            }
+
+            foreach ($content as $field => $value) {
+                switch ($field) {
+                    case 'Patient_Email':
+                        if (empty($value) || !filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                            $validationErrors[] = 'Patient email is required and must be a string.';
+                            $failed_records++;
+                        }
+                        break;
+
+                    case 'Doctor_Email':
+                        if (empty($value) || !filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                            $validationErrors[] = 'Doctor email is required and must be a valid email address.';
+                            $failed_records++;
+                        }
+                        break;
+
+                    case 'Start_Date':
+                        if (!empty($value) && !strtotime($value)) {
+                            $validationErrors[] = 'Start_Time must be a valid date.';
+                            $failed_records++;
+                        }else if(empty($value)){
+                            $validationErrors[] = 'Start Time is required.';
+                            $failed_records++;
+                        }
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+
+            if (!empty($validationErrors)) {
+                continue;
+            }
+
+            $dataToInsert = [
+                'doctor_id' => $check_doctor,
+                'patient_id' => $check_patient,
+                'status' => 1,
+                'date_time' => !empty($content['Start_Date']) ? Carbon::parse($content['Start_Date'])->format('Y-m-d H:i:s') : null,
+            ];
+
+            if(!$content['End_Date']){
+                $app = new Appointment();
+                $app->doctor_id = $check_doctor;
+                $app->patient_id = $check_patient;
+                $app->date_time = !empty($content['Start_Date']) ? Carbon::parse($content['Start_Date'])->format('Y-m-d H:i:s') : null;
+                $app->status = 1;
+                $app->save();
+            }
+        }
+        return response()->json([
+            'total_records' => count($file_contents),
+            'failed_records' => $failed_records,
+            'successful_records' => count($file_contents) - $failed_records,
+            'reporting_errors' => $validationErrors
+        ]);
+    }
+
+    public static function normalizeCsvData($content){
+        $reformatted_data = array_map(function($record) {
+            return array_combine(
+                array_map(function($key) {
+                    return trim($key, '"');
+                }, array_keys($record)),
+                array_map(function($value) {
+                    return trim($value, '"');
+                }, $record)
+            );
+        }, $content);
+
+        return $reformatted_data;
+    }
 }

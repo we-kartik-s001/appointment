@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 use VaahCms\Modules\Appointments\Models\Appointment;
 use VaahCms\Modules\Appointments\Models\Patient;
 use VaahCms\Modules\Appointments\Models\Doctor;
@@ -232,5 +233,39 @@ class AppointmentsController extends Controller
     }
     //----------------------------------------------------------
 
+    public function exportAppointments(){
+        try{
+            return Appointment::exportAppointments();
+        }catch (\Exception $e){
+            $response = [];
+            $response['success'] = false;
+            if(env('APP_DEBUG')){
+                $response['errors'][] = $e->getMessage();
+                $response['hint'] = $e->getTrace();
+            } else{
+                $response['errors'][] = trans("vaahcms-general.something_went_wrong");
+            }
+            return $response;
+        }
+    }
 
+    public function importAppointments(Request $request){
+        $fileContents = $request->json()->all();
+        if(!$fileContents){
+            return ;
+        }
+        try{
+            return Appointment::importAppointments($fileContents);
+        }catch (\Exception $e){
+            $response = [];
+            $response['success'] = false;
+            if(env('APP_DEBUG')){
+                $response['errors'][] = $e->getMessage();
+                $response['hint'] = $e->getTrace();
+            } else{
+                $response['errors'][] = trans("vaahcms-general.something_went_wrong");
+            }
+            return $response;
+        }
+    }
 }
