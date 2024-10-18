@@ -1,7 +1,11 @@
 <script setup>
 import {useAppointmentStore} from "../../../stores/store-appointments";
-import {defineProps, watch, ref} from "vue";
+import {defineProps, watch, ref, onMounted} from "vue";
 const store = useAppointmentStore();
+
+onMounted(() => {
+    store.listDatabaseMappers();
+})
 
 const props = defineProps({
     activeindex: {
@@ -21,6 +25,9 @@ const removeFile = ()=>{
 }
 
 const uploadFile = ()=>{
+    if(!uploadedFile.value){
+        alert('File should be uploaded!!!');
+    }
     const file = uploadedFile.value;
     if (file) {
         const reader = new FileReader();
@@ -87,7 +94,37 @@ watch(
         </div>
         <div v-else-if="active_index === 1">
             <div v-if="store.csv_headers">
-                {{store.csv_headers}}
+                <div v-if="store.csv_headers">
+                        <div class="flex justify-center my-8">
+                            <div class="overflow-x-auto w-full max-w-4xl">
+                                <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-lg">
+                                    <thead class="bg-gray-200 text-gray-700">
+                                    <tr class="align-center">
+                                        <th class="py-3 px-6 border-b text-left">Database Mapper</th>
+                                        <th class="py-3 px-6 border-b text-left">CSV Headers</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr v-for="(header, index) in store.list_database_mappers" :key="index" class="hover:bg-gray-100 transition-colors duration-200">
+                                        <td class="py-3 px-6 border-b text-center">{{header}}</td>
+                                        <td class="py-3 px-6 border-b text-center">
+                                            <Dropdown class="w-full"
+                                                      v-model="store.csv_headers[index]"
+                                                      :options="store.csv_headers"
+                                                      placeholder="Select Your Headers"
+                                                      filter
+                                            />
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    <Button @click="mapHeaders">Map Data</Button>
+                </div>
+                <div v-else>
+                    <h3>Nothing to map</h3>
+                </div>
             </div>
         </div>
         <div v-else-if="active_index === 2">

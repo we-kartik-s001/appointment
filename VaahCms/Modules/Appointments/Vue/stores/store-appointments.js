@@ -78,7 +78,8 @@ export const useAppointmentStore = defineStore({
         show_reporting_log: false,
         steps: [],
         active_index: 0,
-        csv_headers: []
+        csv_headers: [],
+        list_database_mappers: []
     }),
     getters: {
 
@@ -1032,13 +1033,23 @@ export const useAppointmentStore = defineStore({
             if(this.active_index != 0) {
                 this.active_index -= 1;
             }
-            console.log('previous step')
         },
         getUploadedCsvHeaders(fileData){
             this.csv_headers = this.normalizeCsvHeaders(Object.keys(fileData[0]));
         },
         normalizeCsvHeaders(headers){
             return headers.map(item => item.replace(/"/g, ''));
+        },
+        listDatabaseMappers(){
+            this.list_database_mappers = [
+                'Patient Name',
+                'Patient Email',
+                'Doctor Name',
+                'Doctor Email',
+                'Doctor Specialization',
+                'Start Date',
+                'End Date'
+            ]
         }
     }
 });
