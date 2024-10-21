@@ -79,7 +79,18 @@ export const useAppointmentStore = defineStore({
         steps: [],
         active_index: 0,
         csv_headers: [],
-        list_database_mappers: []
+        list_database_headers: [],
+        headers:{
+            appointments:[],
+            doctors:[],
+            patients:[]
+        },
+        field_mappers:{
+            doctor_fields_mapper: null,
+            patient_fields_mapper: null,
+            appointments_fields_mapper: null
+        },
+        csv_file_data: null
     }),
     getters: {
 
@@ -1036,20 +1047,43 @@ export const useAppointmentStore = defineStore({
         },
         getUploadedCsvHeaders(fileData){
             this.csv_headers = this.normalizeCsvHeaders(Object.keys(fileData[0]));
+            this.csv_file_data = fileData;
         },
         normalizeCsvHeaders(headers){
             return headers.map(item => item.replace(/"/g, ''));
         },
-        listDatabaseMappers(){
-            this.list_database_mappers = [
-                'Patient Name',
-                'Patient Email',
-                'Doctor Name',
-                'Doctor Email',
-                'Doctor Specialization',
-                'Start Date',
-                'End Date'
-            ]
+        async listDatabaseHeaders(){
+            ajax_url = ajax_url+'/dataBaseHeaders/list';
+            await vaah().ajax(
+                ajax_url,
+                this.afterListDatabaseHeaders,
+            );
+        },
+        afterListDatabaseHeaders(data, res){
+            if(res.data){
+                this.headers = res.data.headers
+            }else{
+                console.log('No header founds');
+            }
+            ajax_url = base_url + "/appointments/appointments";
+        },
+        async mapHeadersHandler(){
+            ajax_url = ajax_url+'/csv/mapfields';
+            this.options = {
+                params: {
+                    'field_mappers' : this.field_mappers,
+                    'csv_file_data' : this.csv_file_data
+                },
+                method: 'put',
+            }
+            await vaah().ajax(
+                ajax_url,
+                this.afterMapHeaders,
+                this.options
+            );
+        },
+        afterMapHeaders(data,res){
+
         }
     }
 });

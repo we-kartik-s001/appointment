@@ -698,7 +698,7 @@ class Appointment extends VaahModel
         return Excel::download(new AppointmentsExport,'appointments.csv');
     }
 
-    public static function importAppointments($file_contents){
+    public static function importAppointments($file_contents, $field_mappers){
         $failed_records = 0;
         $file_contents = self::normalizeCsvData($file_contents);
         $validationErrors = [];
@@ -788,4 +788,27 @@ class Appointment extends VaahModel
 
         return $reformatted_data;
     }
+
+    public static function listDatabaseHeaders(){
+        $headers['appointments'] = self::getFillableColumns();
+        $headers['doctors'] = Doctor::getFillableColumns();
+        $headers['patients'] = Patient::getFillableColumns();
+//        $database_headers = array_merge($headers['doctors'],$headers['patients'],$headers['appointments']);
+        if(!$headers['appointments'] && !$headers['doctors'] && !$headers['patients']){
+            $response['errors'] = 'Insufficient headers to map the data';
+            return $response;
+        }
+        return response()->json([
+           'headers' =>  $headers
+        ]);
+    }
+
+    public static function mapFields($request){
+       $csv_file_data = $request->input('csv_file_data');
+       $field_mappers = $request->input('field_mappers');
+
+//        dd($csv_file_data, $field_mappers);
+////        dd($field_mappers);
+           self::importAppointments($csv_file_data, $field_mappers);
+       }
 }
