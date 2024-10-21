@@ -86,11 +86,12 @@ export const useAppointmentStore = defineStore({
             patients:[]
         },
         field_mappers:{
-            doctor_fields_mapper: null,
-            patient_fields_mapper: null,
+            // doctor_fields_mapper: null,
+            // patient_fields_mapper: null,
             appointments_fields_mapper: null
         },
-        csv_file_data: null
+        csv_file_data: null,
+        mapping_errors: []
     }),
     getters: {
 
@@ -1047,6 +1048,7 @@ export const useAppointmentStore = defineStore({
         },
         getUploadedCsvHeaders(fileData){
             this.csv_headers = this.normalizeCsvHeaders(Object.keys(fileData[0]));
+            this.csv_headers.push('-');
             this.csv_file_data = fileData;
         },
         normalizeCsvHeaders(headers){
@@ -1083,7 +1085,11 @@ export const useAppointmentStore = defineStore({
             );
         },
         afterMapHeaders(data,res){
-
+            if(res.data){
+                this.mapping_errors = res.data
+                console.log('checking response',res.data);
+            }
+            ajax_url = base_url + "/appointments/appointments";
         }
     }
 });

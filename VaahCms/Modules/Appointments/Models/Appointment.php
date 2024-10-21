@@ -699,80 +699,66 @@ class Appointment extends VaahModel
     }
 
     public static function importAppointments($file_contents, $field_mappers){
-        $failed_records = 0;
+        $error = null;
         $file_contents = self::normalizeCsvData($file_contents);
-        $validationErrors = [];
-
-        foreach ($file_contents as $index => $content) {
-            $check_doctor = Doctor::where('email', $content['Doctor_Email'])->pluck('id')->first();
-            $check_patient = Patient::where('email',$content['Patient_Email'])->pluck('id')->first();
-            if(!$check_doctor && strlen($content['Doctor_Email'])){
-                $validationErrors[] = 'Doctor with '. $content['Doctor_Email'].' doesn\'t exists';
-                $failed_records++;
-            }
-            if(!$check_patient && strlen($content['Patient_Email'])){
-                $validationErrors[] = 'Patient with '. $content['Patient_Email'].' doesn\'t exists';
-                $failed_records++;
-            }
-
-            foreach ($content as $field => $value) {
-                switch ($field) {
-                    case 'Patient_Email':
-                        if (empty($value) || !filter_var($value, FILTER_VALIDATE_EMAIL)) {
-                            $validationErrors[] = 'Patient email is required and must be a string.';
-                            $failed_records++;
-                        }
-                        break;
-
-                    case 'Doctor_Email':
-                        if (empty($value) || !filter_var($value, FILTER_VALIDATE_EMAIL)) {
-                            $validationErrors[] = 'Doctor email is required and must be a valid email address.';
-                            $failed_records++;
-                        }
-                        break;
-
-                    case 'Start_Date':
-                        if (!empty($value) && !strtotime($value)) {
-                            $validationErrors[] = 'Start_Time must be a valid date.';
-                            $failed_records++;
-                        }else if(empty($value)){
-                            $validationErrors[] = 'Start Time is required.';
-                            $failed_records++;
-                        }
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-
-            if (!empty($validationErrors)) {
-                continue;
-            }
-
-            $dataToInsert = [
-                'doctor_id' => $check_doctor,
-                'patient_id' => $check_patient,
-                'status' => 1,
-                'date_time' => !empty($content['Start_Date']) ? Carbon::parse($content['Start_Date'])->format('Y-m-d H:i:s') : null,
+        $mappedData = [];
+        foreach ($file_contents as $record) {
+            $mappedRecord = [
+                'appointment' => []
             ];
 
-            if(!$content['End_Date']){
-                $app = new Appointment();
-                $app->doctor_id = $check_doctor;
-                $app->patient_id = $check_patient;
-                $app->date_time = !empty($content['Start_Date']) ? Carbon::parse($content['Start_Date'])->format('Y-m-d H:i:s') : null;
-                $app->status = 1;
-                $app->save();
+            foreach ($field_mappers['appointments_fields_mapper'] as $field) {
+                $mappedRecord['appointment'][$field['header']] = $record[$field['selectedValue']] ?? null;
+            }
+
+            $mappedData[] = $mappedRecord;
+        }
+
+        function isValidData($data)
+        {
+            $validity = [];
+            if (!filter_var($data['doctor_id'], FILTER_VALIDATE_EMAIL)) {
+                $validity[] = 'Doctor email must be valid';
+            }
+            if (!filter_var($data['patient_id'], FILTER_VALIDATE_EMAIL)) {
+                $validity[] = 'Patient email must be valid';
+            }
+            if (!isset($data['date_time']) || !strtotime($data['date_time'])) {
+                $validity[] = 'Slot date & time must be a valid date and time';
+            }
+             return $validity;
+        }
+
+            foreach ($mappedData as $data) {
+                $dataValid = isValidData($data['appointment']);
+                if ($dataValid) {
+                    $error =  $dataValid;
+                }
+                else{
+                    $doctor_id = Doctor::where('email',$data['appointment']['doctor_id'])->pluck('id');
+                    $patient_id = Doctor::where('email',$data['appointment']['patient_id'])->pluck('id');
+                    if($doctor_id == null || $patient_id == null){
+                        $error = ['Users Invalid'];
+                        return $response['errors'] = $error;
+                    }else{
+                        Appointment::create([
+                            'doctor_id' => $doctor_id,
+                            'patient_id' => $patient_id,
+                            'date_time' => $data['appointment']['date_time']
+                        ]);
+                    }
+                }
+            }
+            if($error){
+                return response()->json([
+                    'errors' => $error
+                ]);
+            }else{
+                return response()->json([
+                    'success' => 'Appointment created successfully'
+                ]);
             }
         }
-        return response()->json([
-            'total_records' => count($file_contents),
-            'failed_records' => $failed_records,
-            'successful_records' => count($file_contents) - $failed_records,
-            'reporting_errors' => $validationErrors
-        ]);
-    }
 
     public static function normalizeCsvData($content){
         $reformatted_data = array_map(function($record) {
@@ -791,9 +777,8 @@ class Appointment extends VaahModel
 
     public static function listDatabaseHeaders(){
         $headers['appointments'] = self::getFillableColumns();
-        $headers['doctors'] = Doctor::getFillableColumns();
-        $headers['patients'] = Patient::getFillableColumns();
-//        $database_headers = array_merge($headers['doctors'],$headers['patients'],$headers['appointments']);
+//        $headers['doctors'] = Doctor::getFillableColumns();
+//        $headers['patients'] = Patient::getFillableColumns();
         if(!$headers['appointments'] && !$headers['doctors'] && !$headers['patients']){
             $response['errors'] = 'Insufficient headers to map the data';
             return $response;
@@ -806,9 +791,7 @@ class Appointment extends VaahModel
     public static function mapFields($request){
        $csv_file_data = $request->input('csv_file_data');
        $field_mappers = $request->input('field_mappers');
-
-//        dd($csv_file_data, $field_mappers);
-////        dd($field_mappers);
-           self::importAppointments($csv_file_data, $field_mappers);
-       }
+       $test = self::importAppointments($csv_file_data, $field_mappers);
+       return $test;
+   }
 }

@@ -56,23 +56,23 @@ const csvToJson = (csv) => {
     return result;
 };
 
-store.field_mappers.doctor_fields_mapper = computed(() => {
-    return store.headers.doctors.map((header, index) => {
-        return {
-            header: header,
-            selectedValue: store.csv_headers[index] || null
-        };
-    });
-})
-
-store.field_mappers.patient_fields_mapper = computed(() => {
-    return store.headers.patients.map((header, index) => {
-        return {
-            header: header,
-            selectedValue: store.csv_headers[index] || null
-        };
-    });
-})
+// store.field_mappers.doctor_fields_mapper = computed(() => {
+//     return store.headers.doctors.map((header, index) => {
+//         return {
+//             header: header,
+//             selectedValue: store.csv_headers[index] || null
+//         };
+//     });
+// })
+//
+// store.field_mappers.patient_fields_mapper = computed(() => {
+//     return store.headers.patients.map((header, index) => {
+//         return {
+//             header: header,
+//             selectedValue: store.csv_headers[index] || null
+//         };
+//     });
+// })
 
 store.field_mappers.appointments_fields_mapper = computed(() => {
     return store.headers.appointments.map((header, index) => {
@@ -124,59 +124,67 @@ watch(
         </div>
         <div v-else-if="active_index === 1">
             <div v-if="store.csv_headers">
-                    <div v-for="(header,index) in store.headers.doctors">
-                         {{header}}
-                        <Dropdown class="w-225"
-                                  v-model="store.csv_headers[index]"
-                                  :options="store.csv_headers"
-                                  placeholder="Select Your Headers"
-                                  filter
-                        />
-                    </div>
-                    <div v-for="(header,index) in store.headers.patients">
-                        {{header}}
-                        <Dropdown class="w-225"
-                                  v-model="store.csv_headers[index]"
-                                  :options="store.csv_headers"
-                                  placeholder="Select Your Headers"
-                                  filter
-                        />
-
-                    </div>
-                    <div v-for="(header,index) in store.headers.appointments">
-                            {{header}}
-                        <Dropdown class="w-225"
-                                  v-model="store.csv_headers[index]"
-                                  :options="store.csv_headers"
-                                  placeholder="Select Your Headers"
-                                  filter
-                        />
-                    </div>
-<!--                        <div class="flex justify-center my-8">-->
-<!--                            <div class="overflow-x-auto w-full max-w-4xl">-->
-<!--                                <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-lg">-->
-<!--                                    <thead class="bg-gray-200 text-gray-700">-->
-<!--                                    <tr class="align-center">-->
-<!--                                        <th class="py-3 px-6 border-b text-left">Database Mapper</th>-->
-<!--                                        <th class="py-3 px-6 border-b text-left">CSV Headers</th>-->
-<!--                                    </tr>-->
-<!--                                    </thead>-->
-<!--                                    <tbody>-->
-<!--                                    <tr v-for="(header, index) in store.headers" :key="index" class="hover:bg-gray-100 transition-colors duration-200">-->
-<!--                                        <td class="py-3 px-6 border-b text-center">{{header}}</td>-->
-<!--                                        <td class="py-3 px-6 border-b text-center">-->
-<!--                                            <Dropdown class="w-full"-->
-<!--                                                      v-model="store.csv_headers[index]"-->
-<!--                                                      :options="store.csv_headers"-->
-<!--                                                      placeholder="Select Your Headers"-->
-<!--                                                      filter-->
-<!--                                            />-->
-<!--                                        </td>-->
-<!--                                    </tr>-->
-<!--                                    </tbody>-->
-<!--                                </table>-->
-<!--                            </div>-->
-<!--                        </div>-->
+<!--                    <div v-for="(header,index) in store.headers.doctors">-->
+<!--                       <span v-if="header != 'id'">-->
+<!--                            {{header}}-->
+<!--                        <Dropdown class="w-225"-->
+<!--                                  v-model="store.csv_headers[index]"-->
+<!--                                  :options="store.csv_headers"-->
+<!--                                  placeholder="Select Your Headers"-->
+<!--                                  filter-->
+<!--                        />-->
+<!--                        </span>-->
+<!--                    </div>-->
+<!--                    <div v-for="(header,index) in store.headers.patients">-->
+<!--                        <span v-if="header != 'id'">-->
+<!--                            {{header}}-->
+<!--                        <Dropdown class="w-225"-->
+<!--                                  v-model="store.csv_headers[index]"-->
+<!--                                  :options="store.csv_headers"-->
+<!--                                  placeholder="Select Your Headers"-->
+<!--                                  filter-->
+<!--                        />-->
+<!--                        </span>-->
+<!--                    </div>-->
+<!--                    <div v-for="(header,index) in store.headers.appointments">-->
+<!--                        <span v-if="header != 'id'">-->
+<!--                            {{header}}-->
+<!--                        <Dropdown class="w-225"-->
+<!--                                  v-model="store.csv_headers[index]"-->
+<!--                                  :options="store.csv_headers"-->
+<!--                                  placeholder="Select Your Headers"-->
+<!--                                  filter-->
+<!--                        />-->
+<!--                        </span>-->
+<!--                    </div>-->
+                        <div class="flex justify-center my-8">
+                            <div class="overflow-x-auto w-full max-w-4xl">
+                                <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-lg">
+                                    <thead class="bg-gray-200 text-gray-700">
+                                    <tr class="align-center">
+                                        <th class="py-3 px-6 border-b text-left">Database Mapper</th>
+                                        <th class="py-3 px-6 border-b text-left">CSV Headers</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr v-for="(header, index) in store.headers.appointments" :key="index" class="hover:bg-gray-100 transition-colors duration-200">
+                                        <td class="py-3 px-6 border-b text-center" v-if="header != 'id'">
+                                            <span v-if="header === 'patient_id'">Patient Email</span>
+                                            <span v-if="header === 'doctor_id'">Doctor Email</span>
+                                            <span v-if="header === 'date_time'">Time Slot</span>
+                                        </td>
+                                        <td class="py-3 px-6 border-b text-center" v-if="header != 'id'">
+                                            <Dropdown class="w-full"
+                                                      :options="store.csv_headers"
+                                                      placeholder="Select Your Headers"
+                                                      filter
+                                            />
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     <Button @click="mapHeaders">Map Data</Button>
                     <div>
 
