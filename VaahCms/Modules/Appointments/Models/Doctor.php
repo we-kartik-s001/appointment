@@ -234,7 +234,7 @@ class Doctor extends VaahModel
             $filter_value = $field_filter[$filter];
             switch ($filter){
                 case 'specialization' :
-                    $query->where('specialization',$filter_value);
+                    $query->whereIn('specialization',$filter_value);
                     break;
                 case 'price' :
                     $parts = explode('-', $filter_value);

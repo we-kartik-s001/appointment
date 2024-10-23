@@ -73,9 +73,9 @@ const importAppointments = (jsonData) => {
     store.importAppointments(jsonData);
 }
 
-watch(() => store.show_file_upload_dialog, (newVal) => {
-    fileInput.value.click();
-});
+// watch(() => store.show_file_upload_dialog, (newVal) => {
+//     fileInput.value.click();
+// });
 </script>
 
 <template>

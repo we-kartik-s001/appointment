@@ -75,7 +75,23 @@ export const useAppointmentStore = defineStore({
             'failed_records': null,
             'reporting_errors': null
         },
-        show_reporting_log: false
+        show_reporting_log: false,
+        steps: [],
+        active_index: 0,
+        csv_headers: [],
+        list_database_headers: [],
+        headers:{
+            appointments:[],
+            doctors:[],
+            patients:[]
+        },
+        field_mappers:{
+            // doctor_fields_mapper: null,
+            // patient_fields_mapper: null,
+            appointments_fields_mapper: null
+        },
+        csv_file_data: null,
+        mapping_errors: null
     }),
     getters: {
 
@@ -982,22 +998,95 @@ export const useAppointmentStore = defineStore({
         },
 
         async importAppointments(fileData){
+            ajax_url = ajax_url+'/importAppointments/list';
+            this.options = {
+                params: fileData,
+                method: 'post',
+                headers: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
             await vaah().ajax(
-                this.ajax_url.concat('/importAppointments/list'),
-                (data, res) => {
-                    if(res.data.success){
-                        this.getList();
-                    }else{
-                        this.upload_errors = res.data.upload_errors;
-                        this.show_error_dialog = true
-                    }
+                this.ajax_url,
+                this.afterImportAppointments,
+                this.options
+            );
+        },
+
+        afterImportAppointments(data, res){
+            if(res.data.success){
+                console.log('checking import',res);
+                this.getList();
+            }else{
+                this.upload_errors = res.data.upload_errors;
+                this.show_error_dialog = true
+            }
+            ajax_url = base_url + "/appointments/appointments";
+        },
+        listCsvImportSteps(){
+            this.steps = [
+                {
+                    label: 'Upload CSV',
+                    pageIndex: 0,
                 },
                 {
-                    params: fileData,
-                    method: 'post',
-                    headers: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
+                    label: 'Map Data',
+                    pageIndex: 1,
+                },
+            ]
+        },
+        nextImportStep(){
+            if(this.active_index != 1){
+                this.active_index += 1;
+            }
+        },
+        previousImportStep(){
+            if(this.active_index != 0) {
+                this.active_index -= 1;
+            }
+        },
+        getUploadedCsvHeaders(fileData){
+            this.csv_headers = this.normalizeCsvHeaders(Object.keys(fileData[0]));
+            this.csv_file_data = fileData;
+        },
+        normalizeCsvHeaders(headers){
+            return headers.map(item => item.replace(/"/g, ''));
+        },
+        async listDatabaseHeaders(){
+            ajax_url = ajax_url+'/dataBaseHeaders/list';
+            await vaah().ajax(
+                ajax_url,
+                this.afterListDatabaseHeaders,
             );
+        },
+        afterListDatabaseHeaders(data, res){
+            if(res.data){
+                this.headers = res.data.headers
+            }else{
+                console.log('No header founds');
+            }
+            ajax_url = base_url + "/appointments/appointments";
+        },
+        async mapHeadersHandler(){
+            ajax_url = ajax_url+'/csv/mapfields';
+            this.options = {
+                params: {
+                    'field_mappers' : this.field_mappers,
+                    'csv_file_data' : this.csv_file_data
+                },
+                method: 'put',
+            }
+            await vaah().ajax(
+                ajax_url,
+                this.afterMapHeaders,
+                this.options
+            );
+        },
+        afterMapHeaders(data,res){
+            if(res.data.errors){
+                this.mapping_errors = false;
+            }else if(res.data.success){
+                this.mapping_errors = true;
+            }
+            ajax_url = base_url + "/appointments/appointments";
         }
     }
 });

@@ -73,12 +73,13 @@ onBeforeMount(() => {
                 <template #label>
                     <b>Specialization:</b>
                 </template>
-
+                
                 <div v-for="(specialization,index) in store.specializations" :key="index" class="field-radiobutton">
-                    <RadioButton name="active-all"
-                                 :inputId="specialization"
-                                 :value="specialization"
-                                 v-model="store.query.field_filter.specialization" />
+                    <Checkbox v-model="store.query.field_filter.specialization"
+                              :inputId="specialization"
+                              :value="specialization"
+                              name="active-specializations"
+                    />
                     <label for="active-all" class="cursor-pointer">{{specialization}}</label>
                 </div>
 

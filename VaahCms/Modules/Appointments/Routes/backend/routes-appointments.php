@@ -75,5 +75,12 @@ function () {
     Route::get('/exportAppointments/list',[AppointmentsController::class,'exportAppointments'])
         ->name('vh.backend.appointments.doctors.bulkexport.action');
 
-    Route::post('/importAppointments/list',[AppointmentsController::class,'importAppointments']);
+    Route::post('/importAppointments/list',[AppointmentsController::class,'importAppointments'])
+        ->name('vh.backend.appointments.doctors.bulkimport.action');
+
+    Route::get('/dataBaseHeaders/list',[AppointmentsController::class,'listDatabaseHeaders'])
+        ->name('vh.backend.appointments.doctors.listDatabaseHeaders');
+
+    Route::put('/csv/mapfields',[AppointmentsController::class,'mapFields'])
+        ->name('vh.backend.appointments.doctors.mapFields');
 });

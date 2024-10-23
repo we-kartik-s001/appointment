@@ -19,6 +19,8 @@ import Tooltip from 'primevue/tooltip';
 import Chart from "primevue/chart";
 import Card from "primevue/card";
 import FileUpload from "primevue/fileupload";
+import Steps from "primevue/steps";
+import Checkbox from "primevue/checkbox";
 //-------------/PrimeVue Imports
 
 //-------------CRUD PrimeVue Imports
@@ -81,6 +83,8 @@ app.component('ProgressBar', ProgressBar);
 app.component('Toast', Toast);
 app.component('Chart',Chart);
 app.component('FileUpload',FileUpload);
+app.component('Steps',Steps);
+app.component('Checkbox', Checkbox)
 //-------------/PrimeVue Use
 
 // -------------CRUD PrimeVue Use
