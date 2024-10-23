@@ -91,7 +91,7 @@ export const useAppointmentStore = defineStore({
             appointments_fields_mapper: null
         },
         csv_file_data: null,
-        mapping_errors: []
+        mapping_errors: null
     }),
     getters: {
 
@@ -1019,6 +1019,7 @@ export const useAppointmentStore = defineStore({
                 this.upload_errors = res.data.upload_errors;
                 this.show_error_dialog = true
             }
+            ajax_url = base_url + "/appointments/appointments";
         },
         listCsvImportSteps(){
             this.steps = [
@@ -1030,14 +1031,10 @@ export const useAppointmentStore = defineStore({
                     label: 'Map Data',
                     pageIndex: 1,
                 },
-                {
-                    label: 'Finish Upload',
-                    pageIndex: 2,
-                },
             ]
         },
         nextImportStep(){
-            if(this.active_index != 2){
+            if(this.active_index != 1){
                 this.active_index += 1;
             }
         },
@@ -1048,7 +1045,6 @@ export const useAppointmentStore = defineStore({
         },
         getUploadedCsvHeaders(fileData){
             this.csv_headers = this.normalizeCsvHeaders(Object.keys(fileData[0]));
-            this.csv_headers.push('-');
             this.csv_file_data = fileData;
         },
         normalizeCsvHeaders(headers){
@@ -1085,9 +1081,10 @@ export const useAppointmentStore = defineStore({
             );
         },
         afterMapHeaders(data,res){
-            if(res.data){
-                this.mapping_errors = res.data
-                console.log('checking response',res.data);
+            if(res.data.errors){
+                this.mapping_errors = false;
+            }else if(res.data.success){
+                this.mapping_errors = true;
             }
             ajax_url = base_url + "/appointments/appointments";
         }

@@ -39,6 +39,7 @@ class Appointment extends VaahModel
         'patient_id',
         'doctor_id',
         'date_time',
+        'status'
     ];
     //-------------------------------------------------
     protected $fill_except = [
@@ -736,16 +737,21 @@ class Appointment extends VaahModel
                 }
                 else{
                     $doctor_id = Doctor::where('email',$data['appointment']['doctor_id'])->pluck('id');
-                    $patient_id = Doctor::where('email',$data['appointment']['patient_id'])->pluck('id');
-                    if($doctor_id == null || $patient_id == null){
-                        $error = ['Users Invalid'];
-                        return $response['errors'] = $error;
+                    $patient_id = Patient::where('email',$data['appointment']['patient_id'])->pluck('id');
+                    if(count($doctor_id->toArray()) == 0 || count($patient_id->toArray()) == 0){
+                        $response['errors'] = ['Users Invalid'];
+                        return $response;
                     }else{
-                        Appointment::create([
-                            'doctor_id' => $doctor_id,
-                            'patient_id' => $patient_id,
-                            'date_time' => $data['appointment']['date_time']
-                        ]);
+                        self::updateOrCreate(
+                            [
+                                'doctor_id' => $doctor_id[0],
+                                'patient_id' => $patient_id[0],
+                                'date_time' => Carbon::parse($data['appointment']['date_time'])->format('Y-m-d H:i:s'),
+                            ],
+                            [
+                                'status' => 1,
+                            ]
+                        );
                     }
                 }
             }

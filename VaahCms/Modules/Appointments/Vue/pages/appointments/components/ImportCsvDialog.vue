@@ -2,6 +2,9 @@
 import {useAppointmentStore} from "../../../stores/store-appointments";
 import {defineProps, watch, ref, onMounted, computed} from "vue";
 const store = useAppointmentStore();
+import {useToast} from "primevue/usetoast";
+
+const toast = useToast();
 
 onMounted(() => {
     store.listDatabaseHeaders();
@@ -22,6 +25,7 @@ const handleFileUpload = (event) => {
 };
 const removeFile = ()=>{
     uploadedFile.value = null;
+    toast.add({ severity: 'success', detail: 'File Removed', life: 3000 });
 }
 
 const uploadFile = ()=>{
@@ -37,6 +41,7 @@ const uploadFile = ()=>{
             store.getUploadedCsvHeaders(jsonData);
         };
         reader.readAsText(file);
+        toast.add({ severity: 'success', detail: 'File Uploaded Successfully', life: 3000 });
     }
 }
 
@@ -56,24 +61,6 @@ const csvToJson = (csv) => {
     return result;
 };
 
-// store.field_mappers.doctor_fields_mapper = computed(() => {
-//     return store.headers.doctors.map((header, index) => {
-//         return {
-//             header: header,
-//             selectedValue: store.csv_headers[index] || null
-//         };
-//     });
-// })
-//
-// store.field_mappers.patient_fields_mapper = computed(() => {
-//     return store.headers.patients.map((header, index) => {
-//         return {
-//             header: header,
-//             selectedValue: store.csv_headers[index] || null
-//         };
-//     });
-// })
-
 store.field_mappers.appointments_fields_mapper = computed(() => {
     return store.headers.appointments.map((header, index) => {
         return {
@@ -91,6 +78,15 @@ watch(
         active_index = props.activeindex
     }
 );
+
+
+watch(
+    () => store.mapping_errors, (newValue) => {
+        if(newValue){
+                toast.add({ severity: 'success', detail: 'Your record has been mapped and imported successfully!', life: 3000 });
+        }
+    }
+);
 </script>
 
 <template>
@@ -99,64 +95,25 @@ watch(
             <div class="upload-section">
                 <input type="file" id="file-upload" class="file-input" @change="handleFileUpload"/>
                 <label for="file-upload" class="upload-label">
-                    <span>Drag and drop files here or click to upload</span>
+                    <span>Click here to upload file</span>
                 </label>
 
                 <div v-if="uploadedFile" class="mt-4">
                     <div>
-                        {{ uploadedFile.name }}
-                        <Button severity="danger"
-                                @click="removeFile(uploadedFile)"
-                                v-tooltip:right="'Remove File'"
-                        >
-                            &cross;
-                        </Button>
-                        <Button class="pi-file-export ml-2"
-                                severity="success"
-                                @click="uploadFile"
-                                v-tooltip:right="'Upload File'"
-                        >
-                            do it
-                        </Button>
+                        <span class="pi pi-file-excel"></span> {{ uploadedFile.name }}
+                        <span class="pi pi-times" @click="removeFile(uploadedFile)"
+                              style="margin-right: 10px; margin-left: 10px;"
+                              v-tooltip="'Remove File'"
+                        ></span>
+                        <span class="pi pi-upload" @click="uploadFile"
+                              v-tooltip="'Upload File'"
+                        ></span>
                     </div>
                 </div>
             </div>
         </div>
         <div v-else-if="active_index === 1">
             <div v-if="store.csv_headers">
-<!--                    <div v-for="(header,index) in store.headers.doctors">-->
-<!--                       <span v-if="header != 'id'">-->
-<!--                            {{header}}-->
-<!--                        <Dropdown class="w-225"-->
-<!--                                  v-model="store.csv_headers[index]"-->
-<!--                                  :options="store.csv_headers"-->
-<!--                                  placeholder="Select Your Headers"-->
-<!--                                  filter-->
-<!--                        />-->
-<!--                        </span>-->
-<!--                    </div>-->
-<!--                    <div v-for="(header,index) in store.headers.patients">-->
-<!--                        <span v-if="header != 'id'">-->
-<!--                            {{header}}-->
-<!--                        <Dropdown class="w-225"-->
-<!--                                  v-model="store.csv_headers[index]"-->
-<!--                                  :options="store.csv_headers"-->
-<!--                                  placeholder="Select Your Headers"-->
-<!--                                  filter-->
-<!--                        />-->
-<!--                        </span>-->
-<!--                    </div>-->
-<!--                    <div v-for="(header,index) in store.headers.appointments">-->
-<!--                        <span v-if="header != 'id'">-->
-<!--                            {{header}}-->
-<!--                        <Dropdown class="w-225"-->
-<!--                                  v-model="store.csv_headers[index]"-->
-<!--                                  :options="store.csv_headers"-->
-<!--                                  placeholder="Select Your Headers"-->
-<!--                                  filter-->
-<!--                        />-->
-<!--                        </span>-->
-<!--                    </div>-->
                         <div class="flex justify-center my-8">
                             <div class="overflow-x-auto w-full max-w-4xl">
                                 <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-lg">
@@ -168,13 +125,14 @@ watch(
                                     </thead>
                                     <tbody>
                                     <tr v-for="(header, index) in store.headers.appointments" :key="index" class="hover:bg-gray-100 transition-colors duration-200">
-                                        <td class="py-3 px-6 border-b text-center" v-if="header != 'id'">
+                                        <td class="py-3 px-6 border-b text-center" v-if="header != 'id' && header != 'status'">
                                             <span v-if="header === 'patient_id'">Patient Email</span>
                                             <span v-if="header === 'doctor_id'">Doctor Email</span>
                                             <span v-if="header === 'date_time'">Time Slot</span>
                                         </td>
-                                        <td class="py-3 px-6 border-b text-center" v-if="header != 'id'">
+                                        <td class="py-3 px-6 border-b text-center" v-if="header != 'id' && header != 'status'">
                                             <Dropdown class="w-full"
+                                                      v-model="store.csv_headers[index]"
                                                       :options="store.csv_headers"
                                                       placeholder="Select Your Headers"
                                                       filter
@@ -185,25 +143,21 @@ watch(
                                 </table>
                             </div>
                         </div>
-                    <Button @click="mapHeaders">Map Data</Button>
                     <div>
-
                     </div>
                 </div>
                 <div v-else>
                     <h3>Nothing to map</h3>
                 </div>
         </div>
-        <div v-else-if="active_index === 2">
-            Page 2
-        </div>
     </div>
 
-    <div class="flex justify-center">
+    <div class="flex justify-center mt-8">
         <div class="button-panel">
             <div class="flex space-x-4 md:space-x-8">
-                <Button @click="store.previousImportStep">Previous</Button>
-                <Button @click="store.nextImportStep">Next</Button>
+                <Button class="step-navigator" @click="store.previousImportStep" v-if="active_index !=0 ">Previous</Button>
+                <Button class="step-navigator" @click="store.nextImportStep" v-if="uploadedFile && active_index!= 1">Next</Button>
+                <Button @click="mapHeaders" v-if="uploadedFile && active_index == 1" class="step-navigator">Map Data</Button>
             </div>
         </div>
     </div>
@@ -215,9 +169,9 @@ watch(
 }
 
 .upload-section {
-    width: 500px;              /* Set a fixed width */
-    height: 300px;             /* Set a fixed height */
-    border: 2px dashed #737475; /* Dashed border for the upload area */
+    width: 400px;              /* Set a fixed width */
+    height: 200px;             /* Set a fixed height */
+    border: 2px solid #737475; /* Dashed border for the upload area */
     border-radius: 8px;        /* Rounded corners */
     padding: 20px;             /* Padding inside the upload section */
     text-align: center;        /* Center text */
@@ -245,5 +199,15 @@ watch(
     border: 1px solid #737475; /* Solid border */
     border-radius: 18px;   /* Rounded corners */
     cursor: pointer;      /* Pointer cursor on hover */
+}
+
+.button-panel {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.step-navigator{
+    margin-left: 20px;
 }
 </style>
