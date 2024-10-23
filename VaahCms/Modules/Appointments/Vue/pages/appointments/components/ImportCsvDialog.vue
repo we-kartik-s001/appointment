@@ -73,6 +73,11 @@ store.field_mappers.appointments_fields_mapper = computed(() => {
 const mapHeaders = () => {
     store.mapHeadersHandler();
 }
+
+const downloadSampleCsv = (type) => {
+    store.exportSample(type);
+}
+
 watch(
     () => props.activeindex, (newValue) => {
         active_index = props.activeindex
@@ -92,12 +97,14 @@ watch(
 <template>
     <div class="csv-import-dialog">
         <div v-if="active_index === 0">
+            <div align="center" style="margin-bottom: 10px;">
+                <Button @click="downloadSampleCsv('downloadsample')"><span class="pi pi-download" style="margin-right: 5px;"></span>Download Sample CSV</Button>
+            </div>
             <div class="upload-section">
                 <input type="file" id="file-upload" class="file-input" @change="handleFileUpload"/>
                 <label for="file-upload" class="upload-label">
                     <span>Click here to upload file</span>
                 </label>
-
                 <div v-if="uploadedFile" class="mt-4">
                     <div>
                         <span class="pi pi-file-excel"></span> {{ uploadedFile.name }}

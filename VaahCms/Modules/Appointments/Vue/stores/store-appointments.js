@@ -1087,6 +1087,34 @@ export const useAppointmentStore = defineStore({
                 this.mapping_errors = true;
             }
             ajax_url = base_url + "/appointments/appointments";
+        },
+
+        exportSample(){
+            ajax_url = ajax_url+'/exportSample/csv';
+             vaah().ajax(
+                 ajax_url,
+                 this.afterExportSample
+                );
+        },
+        afterExportSample(data, res){
+            try{
+                let file_data = null;
+                if(res.data){
+                    file_data = res.data;
+                }
+                const blob = new Blob([file_data]);
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', 'appointments.csv');
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                window.URL.revokeObjectURL(url);
+                ajax_url = ajax_url+'/exportSample/csv';
+            } catch (error) {
+                console.error('Error downloading file:', error);
+            }
         }
     }
 });
