@@ -6,9 +6,11 @@ import {addMinutes} from 'date-fns';
 import { useToast } from "primevue/usetoast";
 import { useConfirm } from "primevue/useconfirm";
 import ImportCsvDialog from "./ImportCsvDialog.vue";
+import useMobileView from "../../../mixins/MobileMixin.js";
+import MobileMixin from "../../../mixins/MobileMixin.js";
 const confirm = useConfirm();
 const toast = useToast();
-
+const { isMobile } = useMobileView();
 const store = useAppointmentStore();
 const useVaah = vaah();
 const csv_import_dialog = ref();
@@ -81,7 +83,7 @@ const onSidebarHide = () => {
 
     <div v-if="store.list">
         <!--table-->
-         <DataTable :value="store.list.data"
+         <DataTable v-if="!isMobile" :value="store.list.data"
                    dataKey="id"
                    :rowClass="store.setRowClass"
                    class="p-datatable-sm p-datatable-hoverable-rows"
@@ -208,6 +210,30 @@ const onSidebarHide = () => {
              </template>
 
         </DataTable>
+
+        <span v-else-if="isMobile">
+<!--            {{store.list.data}}-->
+            <Card v-for="(data, index) in store.list.data" :key="index" style="margin-bottom: 20px; background-color: #f1f1f1">
+                <template #content>
+<!--                    {{data}}-->
+                    <h3>{{data.patient.name.concat("\'s")}} Appointment</h3>
+                    <ul>
+                        <li>Doctor: {{data.doctor.name}}</li>
+                        <li>Specialization: {{data.doctor.specialization}}</li>
+                        <li>Date: {{new Date(data.date_time).toLocaleDateString(undefined,{ year: 'numeric', month: '2-digit', day: '2-digit'})}}</li>
+                        <li>Time Slot: {{new Date(data.date_time).toLocaleTimeString(undefined,{ hour: '2-digit', minute: '2-digit', hour12: true })}} - {{new Date(addMinutes(new Date(data.date_time),15)).toLocaleTimeString(undefined,{ hour: '2-digit', minute: '2-digit', hour12: true })}}</li>
+                        <li>
+                            Status:  <Badge v-if="!data.status"
+                                            value="Cancelled"
+                                            severity="danger"></Badge>
+                                     <Badge v-else
+                                            value="Booked"
+                                            severity="success"></Badge>
+                        </li>
+                    </ul>
+                </template>
+            </Card>
+        </span>
         <!--/table-->
 
         <!--paginator-->
