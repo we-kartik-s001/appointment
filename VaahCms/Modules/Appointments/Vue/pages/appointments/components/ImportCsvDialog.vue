@@ -65,7 +65,7 @@ store.field_mappers.appointments_fields_mapper = computed(() => {
     return store.headers.appointments.map((header, index) => {
         return {
             header: header,
-            selectedValue: store.csv_headers[index] || null
+            selectedValue: selectedHeaders.value[index] || null
         };
     });
 })
@@ -77,6 +77,8 @@ const mapHeaders = () => {
 const downloadSampleCsv = (type) => {
     store.exportSample(type);
 }
+
+const selectedHeaders = ref([]);
 
 watch(
     () => props.activeindex, (newValue) => {
@@ -139,7 +141,7 @@ watch(
                                         </td>
                                         <td class="py-3 px-6 border-b text-center" v-if="header != 'id' && header != 'status'">
                                             <Dropdown class="w-full"
-                                                      v-model="store.csv_headers[index]"
+                                                      v-model="selectedHeaders[index]"
                                                       :options="store.csv_headers"
                                                       placeholder="Select Your Headers"
                                                       filter
