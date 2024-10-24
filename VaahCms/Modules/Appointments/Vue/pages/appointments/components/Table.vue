@@ -227,6 +227,26 @@ const onSidebarHide = () => {
                         </li>
                     </ul>
                 </template>
+
+                 <template #footer>
+                     <div class="p-inputgroup ">
+                        <Button class="p-button-tiny p-button-danger p-button-text w-full"
+                                data-testid="appointments-table-action-trash"
+                                v-if="store.isViewLarge()"
+                                @click = "deleteAppointment('trash', data)"
+                                v-tooltip.top="'Trash'"
+                                icon="pi pi-trash" />
+
+                        <Button
+                            v-if="data.status"
+                            class="p-button-danger p-button-text w-full"
+                            data-testid="appointments-table-to-cacnel"
+                            @click = "cancelAppointment('cancel', data)"
+                            v-tooltip.top="'Cancel Appointment'"
+                            icon="pi pi-times" />
+                    </div>
+                </template>
+
             </Card>
         </span>
         <!--/table-->
