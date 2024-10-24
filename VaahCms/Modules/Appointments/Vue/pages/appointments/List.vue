@@ -3,7 +3,8 @@ import {onMounted, reactive, ref} from "vue";
 import {useRoute} from 'vue-router';
 
 import {useAppointmentStore} from '../../stores/store-appointments'
-import {useRootStore} from '../../stores/root'
+import {useRootStore} from '../../stores/root';
+import useMobileView from "../../mixins/MobileMixin.js";
 
 import Actions from "./components/Actions.vue";
 import Table from "./components/Table.vue";
@@ -12,6 +13,7 @@ import Filters from './components/Filters.vue'
 const store = useAppointmentStore();
 const root = useRootStore();
 const route = useRoute();
+const { isMobile } = useMobileView();
 
 import { useConfirm } from "primevue/useconfirm";
 const confirm = useConfirm();
@@ -59,57 +61,12 @@ const toggleCreateMenu = (event) => {
     create_menu.value.toggle(event);
 };
 //--------/form_menu
-
-// const fileInput = ref(null);
-//
-// const openFileDialog = () => {
-//     fileInput.value.click();
-// };
-//
-// const handleFileUpload = (event) => {
-//     const file = event.target.files[0];
-//     if (file) {
-//         const reader = new FileReader();
-//         reader.onload = (e) => {
-//             const contents = e.target.result;
-//             const jsonData = csvToJson(contents);
-//             console.log('Parsed JSON data:', jsonData);
-//             importAppointments(jsonData);
-//         };
-//         reader.readAsText(file);
-//     }
-// };
-//
-// const csvToJson = (csv) => {
-//     const lines = csv.split('\n');
-//     const result = [];
-//     const headers = lines[0].split(',');
-//
-//     for (let i = 1; i < lines.length; i++) {
-//         const obj = {};
-//         const currentLine = lines[i].split(',');
-//         for (let j = 0; j < headers.length; j++) {
-//             obj[headers[j].trim()] = currentLine[j] ? currentLine[j].trim() : '';
-//         }
-//         result.push(obj);
-//     }
-//     return result;
-// };
-//
-// const exportAppointments = () => {
-//     store.exportAppointments();
-// }
-//
-// const importAppointments = (jsonData) => {
-//     store.exportAppointments(jsonData);
-// }
-
 </script>
 <template>
 
     <div class="grid" v-if="store.assets">
 
-        <div :class="'col-'+(store.show_filters?9:store.list_view_width)">
+        <div :class="'col-'+(store.show_filters && !isMobile ?9:store.list_view_width)">
             <Panel class="is-small">
 
                 <template class="p-1" #header>
@@ -192,5 +149,7 @@ const toggleCreateMenu = (event) => {
 
     </div>
 
-
+    <Sidebar v-if="isMobile" v-model:visible="store.show_filters">
+        <Filters />
+    </Sidebar>
 </template>

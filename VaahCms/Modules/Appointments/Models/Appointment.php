@@ -695,8 +695,8 @@ class Appointment extends VaahModel
         return Carbon::parse($time)->timezone('Asia/Kolkata');
     }
 
-    public static function exportAppointments(){
-        return Excel::download(new AppointmentsExport,'appointments.csv');
+    public static function exportAppointments($type = null){
+        return Excel::download(new AppointmentsExport($type),'appointments.csv');
     }
 
     public static function importAppointments($file_contents, $field_mappers){

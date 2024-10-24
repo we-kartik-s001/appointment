@@ -1,10 +1,12 @@
 <script  setup>
 import {ref, reactive, watch, onMounted} from 'vue';
 import {useRoute} from 'vue-router';
+import useMobileView from "../../../mixins/MobileMixin.js";
 
 import { useAppointmentStore } from '../../../stores/store-appointments'
 
 const store = useAppointmentStore();
+const { isMobile } = useMobileView();
 const route = useRoute();
 
 onMounted(async () => {
@@ -82,7 +84,7 @@ const importAppointments = (jsonData) => {
     <div>
 
         <!--actions-->
-        <div :class="{'flex justify-content-between': store.isViewLarge()}" class="mt-2 mb-2">
+        <div :class="{'flex justify-content-between': store.isViewLarge()}" class="mt-2 mb-2" v-if="!isMobile">
 
             <!--left-->
             <div v-if="store.view === 'large'">
@@ -189,6 +191,54 @@ const importAppointments = (jsonData) => {
 
         </div>
         <!--/actions-->
+
+        <!--mobile actions-->
+        <div v-else-if="isMobile">
+            <InputText v-model="store.query.filter.q"
+                       @keyup.enter="store.delayedSearch()"
+                       class="p-inputtext-sm w-full"
+                       @keyup.enter.native="store.delayedSearch()"
+                       @keyup.13="store.delayedSearch()"
+                       data-testid="appointments-actions-search"
+                       placeholder="Search"/>
+
+                <div class="p-inputgroup flex my-2">
+                    <Button
+                        type="button"
+                        class="p-button-sm w-full"
+                        :disabled="Object.keys(route.params).length"
+                        data-testid="appointments-actions-show-filters"
+                        @click="store.show_filters = !store.show_filters">
+                        Filters
+                        <Badge v-if="store.count_filters > 0" :value="store.count_filters"></Badge>
+                    </Button>
+
+                    <Button
+                        type="button"
+                        icon="pi pi-filter-slash"
+                        data-testid="appointments-actions-reset-filters"
+                        class="p-button-sm w-full"
+                        label="Reset"
+                        @click="store.resetQuery()" />
+                </div>
+
+            <Button class="p-button-sm w-full justify-content-center mb-2"
+                    type="button"
+                    @click="toggleSelectedMenuState"
+                    data-testid="appointments-actions-menu"
+                    aria-haspopup="true"
+                    aria-controls="overlay_menu"
+            >
+                <span class="pi pi-angle-down"></span>
+                <Badge v-if="store.action.items.length > 0"
+                       :value="store.action.items.length" />
+            </Button>
+            <Menu ref="selected_menu_state"
+                  :model="store.list_selected_menu"
+                  :popup="true" />
+            <!--/selected_menu-->
+        </div>
+        <!-- /mobile actions-->
 
     </div>
 </template>

@@ -18,8 +18,8 @@ const appointment_details = computed(() => {
 <template>
     <TabView>
         <TabPanel header="Booked">
-            <table class="border-2">
-                <thead>
+            <table class="border-2 min-w-full bg-white border border-gray-300 rounded-lg shadow-lg">
+                <thead class="bg-gray-200 text-gray-700">
                 <tr>
                     <td>Patient Name</td>
                     <td>Patient Email</td>
@@ -39,13 +39,13 @@ const appointment_details = computed(() => {
         </TabPanel>
 
         <TabPanel header="Cancelled">
-            <table>
-                <thead>
+            <table class="border-2 min-w-full bg-white border border-gray-300 rounded-lg shadow-lg">
+                <thead class="bg-gray-200 text-gray-700">
                     <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                        <td>Patient Name</td>
+                        <td>Patient Email</td>
+                        <td>Patient Phone</td>
+                        <td>Booked Slot</td>
                     </tr>
                 </thead>
                 <tbody>
@@ -60,4 +60,8 @@ const appointment_details = computed(() => {
         </TabPanel>
     </TabView>
 </template>
+
+<style scoped>
+
+</style>
 

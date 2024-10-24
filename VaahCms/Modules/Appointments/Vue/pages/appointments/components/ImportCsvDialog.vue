@@ -65,7 +65,7 @@ store.field_mappers.appointments_fields_mapper = computed(() => {
     return store.headers.appointments.map((header, index) => {
         return {
             header: header,
-            selectedValue: store.csv_headers[index] || null
+            selectedValue: selectedHeaders.value[index] || null
         };
     });
 })
@@ -73,6 +73,13 @@ store.field_mappers.appointments_fields_mapper = computed(() => {
 const mapHeaders = () => {
     store.mapHeadersHandler();
 }
+
+const downloadSampleCsv = (type) => {
+    store.exportSample(type);
+}
+
+const selectedHeaders = ref([]);
+
 watch(
     () => props.activeindex, (newValue) => {
         active_index = props.activeindex
@@ -92,12 +99,14 @@ watch(
 <template>
     <div class="csv-import-dialog">
         <div v-if="active_index === 0">
+            <div align="center" style="margin-bottom: 10px;">
+                <Button @click="downloadSampleCsv('downloadsample')"><span class="pi pi-download" style="margin-right: 5px;"></span>Download Sample CSV</Button>
+            </div>
             <div class="upload-section">
                 <input type="file" id="file-upload" class="file-input" @change="handleFileUpload"/>
                 <label for="file-upload" class="upload-label">
                     <span>Click here to upload file</span>
                 </label>
-
                 <div v-if="uploadedFile" class="mt-4">
                     <div>
                         <span class="pi pi-file-excel"></span> {{ uploadedFile.name }}
@@ -132,7 +141,7 @@ watch(
                                         </td>
                                         <td class="py-3 px-6 border-b text-center" v-if="header != 'id' && header != 'status'">
                                             <Dropdown class="w-full"
-                                                      v-model="store.csv_headers[index]"
+                                                      v-model="selectedHeaders[index]"
                                                       :options="store.csv_headers"
                                                       placeholder="Select Your Headers"
                                                       filter

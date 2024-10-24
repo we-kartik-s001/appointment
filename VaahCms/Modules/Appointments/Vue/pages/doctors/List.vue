@@ -214,7 +214,7 @@ const totalRevenueGenerated = computed(() => {
             />
         </div>
 
-        <div :class="'col-'+(store.show_filters?9:store.list_view_width)">
+        <div :class="'col-'+(store.show_filters || store.show_field_filters?9:store.list_view_width)">
             <Panel class="is-small">
 
                 <template class="p-1" #header>
