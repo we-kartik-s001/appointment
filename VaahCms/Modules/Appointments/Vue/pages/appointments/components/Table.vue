@@ -7,7 +7,6 @@ import { useToast } from "primevue/usetoast";
 import { useConfirm } from "primevue/useconfirm";
 import ImportCsvDialog from "./ImportCsvDialog.vue";
 import useMobileView from "../../../mixins/MobileMixin.js";
-import MobileMixin from "../../../mixins/MobileMixin.js";
 const confirm = useConfirm();
 const toast = useToast();
 const { isMobile } = useMobileView();
@@ -187,7 +186,7 @@ const onSidebarHide = () => {
                                 @click = "deleteAppointment('trash', prop.data)"
                                 v-tooltip.top="'Trash'"
                                 icon="pi pi-trash" />
-<!--                        @click="store.itemAction('trash', prop.data)"-->
+
                         <Button
                             v-if="prop.data.status"
                             class="p-button-danger p-button-text"
@@ -196,8 +195,6 @@ const onSidebarHide = () => {
                             v-tooltip.top="'Cancel Appointment'"
                             icon="pi pi-times" />
                     </div>
-<!--                    @click="store.itemAction('cancel', prop.data)"-->
-
                 </template>
 
 
@@ -212,10 +209,8 @@ const onSidebarHide = () => {
         </DataTable>
 
         <span v-else-if="isMobile">
-<!--            {{store.list.data}}-->
-            <Card v-for="(data, index) in store.list.data" :key="index" style="margin-bottom: 20px; background-color: #f1f1f1">
+            <Card v-for="(data, index) in store.list.data" :key="index" style="margin-bottom: 20px; background-color: #e4e8f1">
                 <template #content>
-<!--                    {{data}}-->
                     <h3>{{data.patient.name.concat("\'s")}} Appointment</h3>
                     <ul>
                         <li>Doctor: {{data.doctor.name}}</li>
