@@ -742,7 +742,9 @@ class Doctor extends VaahModel
     }
 
     public static function getSpecialization(){
-        return self::distinct()->pluck('specialization');
+        return self::select('specialization', \DB::raw('COUNT(*) as user_count'))
+                ->groupBy('specialization')
+                ->get();
     }
 
     public static function exportDoctors(){
