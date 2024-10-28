@@ -42,7 +42,7 @@ onBeforeMount(() => {
 <template>
     <div class="col-3" v-if="store.show_field_filters">
 
-        <Panel class="is-small">
+        <Panel class="is-small" v-if="store.specializations.length > 0">
 
             <template class="p-1" #header>
 
