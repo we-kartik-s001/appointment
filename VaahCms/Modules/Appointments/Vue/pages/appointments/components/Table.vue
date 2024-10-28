@@ -6,9 +6,10 @@ import {addMinutes} from 'date-fns';
 import { useToast } from "primevue/usetoast";
 import { useConfirm } from "primevue/useconfirm";
 import ImportCsvDialog from "./ImportCsvDialog.vue";
+import useMobileView from "../../../mixins/MobileMixin.js";
 const confirm = useConfirm();
 const toast = useToast();
-
+const { isMobile } = useMobileView();
 const store = useAppointmentStore();
 const useVaah = vaah();
 const csv_import_dialog = ref();
@@ -81,7 +82,7 @@ const onSidebarHide = () => {
 
     <div v-if="store.list">
         <!--table-->
-         <DataTable :value="store.list.data"
+         <DataTable v-if="!isMobile" :value="store.list.data"
                    dataKey="id"
                    :rowClass="store.setRowClass"
                    class="p-datatable-sm p-datatable-hoverable-rows"
@@ -185,7 +186,7 @@ const onSidebarHide = () => {
                                 @click = "deleteAppointment('trash', prop.data)"
                                 v-tooltip.top="'Trash'"
                                 icon="pi pi-trash" />
-<!--                        @click="store.itemAction('trash', prop.data)"-->
+
                         <Button
                             v-if="prop.data.status"
                             class="p-button-danger p-button-text"
@@ -194,8 +195,6 @@ const onSidebarHide = () => {
                             v-tooltip.top="'Cancel Appointment'"
                             icon="pi pi-times" />
                     </div>
-<!--                    @click="store.itemAction('cancel', prop.data)"-->
-
                 </template>
 
 
@@ -208,6 +207,48 @@ const onSidebarHide = () => {
              </template>
 
         </DataTable>
+
+        <span v-else-if="isMobile">
+            <Card v-for="(data, index) in store.list.data" :key="index" style="margin-bottom: 20px; background-color: #e4e8f1">
+                <template #content>
+                    <h3>{{data.patient.name.concat("\'s")}} Appointment</h3>
+                    <ul>
+                        <li>Doctor: {{data.doctor.name}}</li>
+                        <li>Specialization: {{data.doctor.specialization}}</li>
+                        <li>Date: {{new Date(data.date_time).toLocaleDateString(undefined,{ year: 'numeric', month: '2-digit', day: '2-digit'})}}</li>
+                        <li>Time Slot: {{new Date(data.date_time).toLocaleTimeString(undefined,{ hour: '2-digit', minute: '2-digit', hour12: true })}} - {{new Date(addMinutes(new Date(data.date_time),15)).toLocaleTimeString(undefined,{ hour: '2-digit', minute: '2-digit', hour12: true })}}</li>
+                        <li>
+                            Status:  <Badge v-if="!data.status"
+                                            value="Cancelled"
+                                            severity="danger"></Badge>
+                                     <Badge v-else
+                                            value="Booked"
+                                            severity="success"></Badge>
+                        </li>
+                    </ul>
+                </template>
+
+                 <template #footer>
+                     <div class="p-inputgroup ">
+                        <Button class="p-button-tiny p-button-danger p-button-text w-full"
+                                data-testid="appointments-table-action-trash"
+                                v-if="store.isViewLarge()"
+                                @click = "deleteAppointment('trash', data)"
+                                v-tooltip.top="'Trash'"
+                                icon="pi pi-trash" />
+
+                        <Button
+                            v-if="data.status"
+                            class="p-button-danger p-button-text w-full"
+                            data-testid="appointments-table-to-cacnel"
+                            @click = "cancelAppointment('cancel', data)"
+                            v-tooltip.top="'Cancel Appointment'"
+                            icon="pi pi-times" />
+                    </div>
+                </template>
+
+            </Card>
+        </span>
         <!--/table-->
 
         <!--paginator-->

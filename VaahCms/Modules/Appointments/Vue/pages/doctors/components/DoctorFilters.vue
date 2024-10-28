@@ -73,7 +73,7 @@ onBeforeMount(() => {
                 <template #label>
                     <b>Specialization:</b>
                 </template>
-                
+
                 <div v-for="(specialization,index) in store.specializations" :key="index" class="field-radiobutton">
                     <Checkbox v-model="store.query.field_filter.specialization"
                               :inputId="specialization"

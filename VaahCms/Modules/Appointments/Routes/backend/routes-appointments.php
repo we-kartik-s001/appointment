@@ -83,4 +83,7 @@ function () {
 
     Route::put('/csv/mapfields',[AppointmentsController::class,'mapFields'])
         ->name('vh.backend.appointments.doctors.mapFields');
+
+    Route::get('/exportSample/csv',[AppointmentsController::class,'exportSampleCsv'])
+        ->name('vh.backend.appointments.doctors.exportSampleCsv');;
 });

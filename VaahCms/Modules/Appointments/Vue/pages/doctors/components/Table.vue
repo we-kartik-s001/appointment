@@ -238,7 +238,7 @@ const showAppointmentDetails = (id) => {
         </Paginator>
         <!--/paginator-->
 
-        <Sidebar v-model:visible="visible" header="Appointments" position="right" role="region" style="width: auto;">
+        <Sidebar v-model:visible="visible" header="Appointments" position="right" role="region" style="width: auto;  width: 500px;">
             <DrawerContent :doctorid = "doctorid" />
         </Sidebar>
     </div>
