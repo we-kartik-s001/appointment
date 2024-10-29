@@ -1,5 +1,6 @@
 <?php namespace VaahCms\Modules\Appointments\Models;
 
+use App\Jobs\ProcessBulkRecords;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
@@ -555,21 +556,8 @@ class Patient extends VaahModel
     //-------------------------------------------------
     public static function seedSampleItems($records=100)
     {
-
-        $i = 0;
-
-        while($i < $records)
-        {
-            $inputs = self::fillItem(false);
-
-            $item =  new self();
-            $item->fill($inputs);
-            $item->save();
-
-            $i++;
-
-        }
-
+        $type = 'Patient';
+        ProcessBulkRecords::dispatch($records, $type);
     }
 
 

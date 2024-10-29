@@ -647,7 +647,8 @@ class Doctor extends VaahModel
     //-------------------------------------------------
     public static function seedSampleItems($records=100)
     {
-        ProcessBulkRecords::dispatch($records);
+        $type = 'Doctor';
+        ProcessBulkRecords::dispatch($records, $type);
     }
 
 
