@@ -974,6 +974,7 @@ export const useDoctorStore = defineStore({
                 this.ajax_url.concat('/specialization'),
                 (data,res) => {
                     this.specializations = res.data;
+                    console.log(this.specializations);
                 }
             );
         },

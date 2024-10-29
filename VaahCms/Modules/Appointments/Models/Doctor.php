@@ -282,7 +282,8 @@ class Doctor extends VaahModel
         foreach ($search_array as $search_item){
             $query->where(function ($q1) use ($search_item) {
                 $q1->where('name', 'LIKE', '%' . $search_item . '%')
-                    ->orWhere('id', 'LIKE', $search_item . '%');
+                    ->orWhere('email', 'LIKE', $search_item . '%')
+                    ->orWhere('specialization', 'LIKE', $search_item . '%');
             });
         }
 
@@ -646,7 +647,8 @@ class Doctor extends VaahModel
     //-------------------------------------------------
     public static function seedSampleItems($records=100)
     {
-        ProcessBulkRecords::dispatch($records);
+        $type = 'Doctor';
+        ProcessBulkRecords::dispatch($records, $type);
     }
 
 
@@ -692,12 +694,15 @@ class Doctor extends VaahModel
                 $type = \DB::getSchemaBuilder()->getColumnType($table, $field);
                 switch ($type){
                     case 'bigint':
-                        $inputs[$field] = random_int(1000000000, 9999999999);;
+                        if($field!= 'id')
+                        {
+                            $inputs[$field] = random_int(1000000000, 9999999999);
+                        }
                         break;
 
                     case 'varchar':
                         if($field === 'name'){
-                            $inputs[$field] = $faker->text(10);
+                            $inputs[$field] = $faker->firstNameMale;
                         }elseif ($field === 'specialization'){
                             $inputs[$field] = $specializations[rand(0,9)];
                         }elseif($field === 'email'){
@@ -715,7 +720,7 @@ class Doctor extends VaahModel
                         }
                         break;
                     case 'smallint':
-                        $inputs[$field] = rand(1,100);
+                        $inputs[$field] =  $faker->numberBetween(1, 19) * 5;
                 }
             }
         }
@@ -742,7 +747,9 @@ class Doctor extends VaahModel
     }
 
     public static function getSpecialization(){
-        return self::distinct()->pluck('specialization');
+        return self::select('specialization', \DB::raw('COUNT(*) as user_count'))
+                ->groupBy('specialization')
+                ->get();
     }
 
     public static function exportDoctors(){

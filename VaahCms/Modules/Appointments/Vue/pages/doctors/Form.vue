@@ -1,5 +1,5 @@
 <script setup>
-import {onMounted, ref, watch} from "vue";
+import {onMounted, ref, watch, computed} from "vue";
 import { useDoctorStore } from '../../stores/store-doctors'
 
 import VhField from './../../vaahvue/vue-three/primeflex/VhField.vue'
@@ -29,6 +29,12 @@ const toggleFormMenu = (event) => {
 };
 //--------/form_menu
 
+const isPriceExceeding = computed(() => {
+    if(store.item.price > 100) {
+        return true
+    }
+    return false;
+});
 </script>
 <template>
 
@@ -71,14 +77,18 @@ const toggleFormMenu = (event) => {
                             v-if="store.item && store.item.id"
                             data-testid="doctors-save"
                             @click="store.itemAction('save')"
-                            icon="pi pi-save"/>
+                            icon="pi pi-save"
+                            :disabled="isPriceExceeding"
+                    />
 
                     <Button label="Create & New"
                             v-else
                             @click="store.itemAction('create-and-new')"
                             class="p-button-sm"
                             data-testid="doctors-create-and-new"
-                            icon="pi pi-save"/>
+                            icon="pi pi-save"
+                            :disabled="isPriceExceeding"
+                    />
 
 
                     <!--form_menu-->
@@ -216,6 +226,9 @@ const toggleFormMenu = (event) => {
                                      data-testid="doctors-price"
                                      v-model="store.item.price" required/>
                         <div class="required-field hidden"></div>
+                    </div>
+                    <div v-if="isPriceExceeding">
+                        <span style="color: red;">Slot price cannot be greater than $100</span>
                     </div>
                 </VhField>
             </div>

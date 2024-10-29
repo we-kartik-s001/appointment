@@ -1,6 +1,6 @@
 <?php namespace VaahCms\Modules\Appointments\Models;
 
-use Carbon\Carbon;
+use App\Jobs\ProcessBulkRecords;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
@@ -556,21 +556,8 @@ class Patient extends VaahModel
     //-------------------------------------------------
     public static function seedSampleItems($records=100)
     {
-
-        $i = 0;
-
-        while($i < $records)
-        {
-            $inputs = self::fillItem(false);
-
-            $item =  new self();
-            $item->fill($inputs);
-            $item->save();
-
-            $i++;
-
-        }
-
+        $type = 'Patient';
+        ProcessBulkRecords::dispatch($records, $type);
     }
 
 
@@ -598,16 +585,17 @@ class Patient extends VaahModel
                 $type = \DB::getSchemaBuilder()->getColumnType($table, $field);
                 switch ($type){
                     case 'bigint':
-                        $inputs[$field] = random_int(1000000000, 9999999999);;
+                        if($field!= 'id')
+                        {
+                            $inputs[$field] = random_int(1000000000, 9999999999);
+                        }
                         break;
 
                     case 'varchar':
                         if($field === 'name'){
-                            $inputs[$field] = $faker->text(10);
-                        }elseif ($field === 'specialization'){
-                            $inputs[$field] = 'Medicine';
+                            $inputs[$field] = $faker->firstNameMale;
                         }elseif($field === 'email'){
-                            $inputs[$field] = $faker->email(60);
+                            $inputs[$field] = $faker->unique()->safeEmail;
                         }
                         break;
                 }

@@ -25,6 +25,10 @@ const handleFileUpload = (event) => {
 };
 const removeFile = ()=>{
     uploadedFile.value = null;
+    const fileInput = document.getElementById('file-upload');
+    if (fileInput) {
+        fileInput.value = ''; 
+    }
     toast.add({ severity: 'success', detail: 'File Removed', life: 3000 });
 }
 
@@ -103,7 +107,7 @@ watch(
                 <Button @click="downloadSampleCsv('downloadsample')"><span class="pi pi-download" style="margin-right: 5px;"></span>Download Sample CSV</Button>
             </div>
             <div class="upload-section">
-                <input type="file" id="file-upload" class="file-input" @change="handleFileUpload"/>
+                <input type="file" id="file-upload" class="file-input" @change="handleFileUpload" ref="fileInput"/>
                 <label for="file-upload" class="upload-label">
                     <span>Click here to upload file</span>
                 </label>

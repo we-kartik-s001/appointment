@@ -42,7 +42,7 @@ onBeforeMount(() => {
 <template>
     <div class="col-3" v-if="store.show_field_filters">
 
-        <Panel class="is-small">
+        <Panel class="is-small" v-if="store.specializations.length > 0">
 
             <template class="p-1" #header>
 
@@ -76,11 +76,14 @@ onBeforeMount(() => {
 
                 <div v-for="(specialization,index) in store.specializations" :key="index" class="field-radiobutton">
                     <Checkbox v-model="store.query.field_filter.specialization"
-                              :inputId="specialization"
-                              :value="specialization"
+                              :inputId="specialization.specialization"
+                              :value="specialization.specialization"
                               name="active-specializations"
                     />
-                    <label for="active-all" class="cursor-pointer">{{specialization}}</label>
+                    <label for="active-all" class="cursor-pointer">
+                        {{specialization.specialization}}
+                        ({{specialization.user_count}})
+                    </label>
                 </div>
 
             </VhFieldVertical>

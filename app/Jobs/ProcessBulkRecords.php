@@ -8,17 +8,19 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use VaahCms\Modules\Appointments\Models\Doctor;
+use VaahCms\Modules\Appointments\Models\Patient;
 
 class ProcessBulkRecords implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    protected $records;
+    protected $records, $type;
     /**
      * Create a new job instance.
      */
-    public function __construct($records)
+    public function __construct($records, $type)
     {
         $this->records = $records;
+        $this->type = $type;
     }
 
     /**
@@ -28,9 +30,13 @@ class ProcessBulkRecords implements ShouldQueue
     {
         $i = 0;
         while ($i<$this->records){
-            $inputs = Doctor::fillItem(false);
-
-            $item =  new Doctor();
+            if($this->type == 'Doctor'){
+                $inputs = Doctor::fillItem(false);
+                $item =  new Doctor();
+            }else if($this->type == 'Patient'){
+                $inputs = Patient::fillItem(false);
+                $item =  new Patient();
+            }
             $item->fill($inputs);
             $item->save();
 
