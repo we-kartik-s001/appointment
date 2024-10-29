@@ -718,7 +718,7 @@ class Doctor extends VaahModel
                         }
                         break;
                     case 'smallint':
-                        $inputs[$field] =  $faker->numberBetween(0, 19) * 5;
+                        $inputs[$field] =  $faker->numberBetween(1, 19) * 5;
                 }
             }
         }
