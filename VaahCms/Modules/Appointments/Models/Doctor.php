@@ -692,12 +692,15 @@ class Doctor extends VaahModel
                 $type = \DB::getSchemaBuilder()->getColumnType($table, $field);
                 switch ($type){
                     case 'bigint':
-                        $inputs[$field] = random_int(1000000000, 9999999999);;
+                        if($field!= 'id')
+                        {
+                            $inputs[$field] = random_int(1000000000, 9999999999);
+                        }
                         break;
 
                     case 'varchar':
                         if($field === 'name'){
-                            $inputs[$field] = $faker->text(10);
+                            $inputs[$field] = $faker->firstNameMale;
                         }elseif ($field === 'specialization'){
                             $inputs[$field] = $specializations[rand(0,9)];
                         }elseif($field === 'email'){
@@ -715,7 +718,7 @@ class Doctor extends VaahModel
                         }
                         break;
                     case 'smallint':
-                        $inputs[$field] = rand(1,100);
+                        $inputs[$field] =  $faker->numberBetween(0, 19) * 5;
                 }
             }
         }
