@@ -134,6 +134,10 @@ watch(() => store.show_file_upload_dialog, (newVal) => {
                     <div class="col-12">
                         <div class="p-inputgroup ">
 
+                            <span class="pi pi-info-circle pt-2 mr-1"
+                                  v-tooltip.top="'Search by name, email & specialization'"
+                            />
+
                             <InputText v-model="store.query.filter.q"
                                        @keyup.enter="store.delayedSearch()"
                                        class="p-inputtext-sm"
